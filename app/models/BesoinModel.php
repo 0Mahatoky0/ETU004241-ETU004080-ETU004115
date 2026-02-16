@@ -13,6 +13,7 @@ class BesoinModel
         $this->db = $db;
     }
 
+    // Méthode pour insérer un besoin
     public function insertBesoin($id_categorie, $libelle, $prix_unitaire)
     {
         $sql = "INSERT INTO besoin (id_categorie, libelle, prix_unitaire) 
@@ -29,6 +30,7 @@ class BesoinModel
         return $this->db->lastInsertId();
     }
 
+    // Méthode pour récupérer tous les besoins
     public function getAllBesoin()
     {
         $sql = "SELECT * FROM besoin";
@@ -36,5 +38,16 @@ class BesoinModel
         $stmt = $this->db->query($sql);
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Méthode pour récupérer un besoin par son ID
+    public function getBesoinById($id)
+    {
+        $sql = "SELECT * FROM besoin WHERE id = :id";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':id' => $id]);
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 }

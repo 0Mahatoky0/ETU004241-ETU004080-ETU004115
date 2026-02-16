@@ -6,13 +6,28 @@
 - requete
     - [ok] insrtion dons
 ### models
-- insertion dons
-- recuperation dons
+- [ok] insertion dons
+- [ok] recuperation dons
 
 ### desing
-- formulaire insrtion dons
+- [ok] formulaire insrtion dons
 
 ### controleurs
-- insrtion dons
+- [ok] insrtion dons
 
 ## insertion de besoin
+### base
+table : 
+    - besoin
+requete : 
+    - insertion
+
+### models
+- fonction insert
+- fonction recuperation
+
+### desing
+- form ajout de besoin
+
+### controleurs
+- controleur insertio besoin

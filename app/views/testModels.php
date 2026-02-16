@@ -1,9 +1,7 @@
 <?php
 
-use app\models\DonModel;
+use app\models\BesoinModel;
 
-$model = new DonModel(Flight::db());
-
-var_dump($model->insertDon(1,40,"ONG 1","2025-01-01")); 
+$model = new BesoinModel(Flight::db());
 
 ?>

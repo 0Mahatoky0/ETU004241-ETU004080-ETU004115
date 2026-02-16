@@ -35,12 +35,10 @@ CREATE TABLE besoin (
 
 CREATE TABLE besoin_sinistre (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    id_region INT NOT NULL,
     id_ville INT NOT NULL,
     id_besoin INT NOT NULL,
     quantite INT,
     id_status_besoin_sinistre INT NOT NULL,
-    FOREIGN KEY (id_region) REFERENCES region(id),
     FOREIGN KEY (id_ville) REFERENCES ville(id),
     FOREIGN KEY (id_besoin) REFERENCES besoin(id),
     FOREIGN KEY (id_status_besoin_sinistre) REFERENCES status_besoin_sinistre(id)
