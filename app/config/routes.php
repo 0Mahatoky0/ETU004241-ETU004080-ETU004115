@@ -6,8 +6,6 @@ use app\middlewares\SecurityHeadersMiddleware;
 use flight\Engine;
 use flight\net\Router;
 
-use app\services\BesoinSinistreServices;
-
 /**
  * @var Router $router 
  * @var Engine $app
@@ -20,12 +18,16 @@ $router->group('', function(Router $router) use ($app) {
 	});
 
 	//insertion des dons
-	$router->get('/dons/add',[DonControleur::class,"showFormDom"]);
-	$router->post('/dons/api/add',[DonControleur::class,"insertDon"]);
+	$router->group('/dons', function() use ($router,$app) {
+		$router->get('/add',[DonControleur::class,"showFormDom"]);
+		$router->post('/api/add',[DonControleur::class,"insertDon"]);
+	});
 
 	//insertion des besoin des sinistrer
-	$router->get('/besoin_sinistre/add',[BesoinSinistreControleur::class,"showForm"]);
-	$router->post('/besoin_sinistre/api/add',[BesoinSinistreControleur::class,"insertBesoinSinistre"]);
+	$router->group('/besoin_sinistre', function() use ($router,$app) {
+		$router->get('/add',[BesoinSinistreControleur::class,"showForm"]);
+		$router->post('/api/add',[BesoinSinistreControleur::class,"insertBesoinSinistre"]);
+	});
 
 }, [ SecurityHeadersMiddleware::class ]);
 

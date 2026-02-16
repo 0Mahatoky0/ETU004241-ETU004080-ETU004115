@@ -39,6 +39,35 @@ class BesoinSinistreModel {
         return $this->db->lastInsertId();
     }
 
+    public function updateStatus($id_besoin_sinistre, $new_status_id) {
+        $sql = "UPDATE besoin_sinistre SET id_status_besoin_sinistre = :new_status_id WHERE id = :id_besoin_sinistre";
+
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([
+            ':new_status_id' => $new_status_id,
+            ':id_besoin_sinistre' => $id_besoin_sinistre
+        ]);
+    }
+    
+
+    public function getLePlusAncienBesoinSinistre() {
+        $statusSinitreModel = new StatusBesoinSinistreModel(Flight::db());
+        $idAccepted = $statusSinitreModel->getIdByCode("ACP")["id"] ?? null;
+
+        if ($idAccepted === null) {
+            // Si le code ACP n'existe pas, fallback: prendre le plus ancien par date sans filtre
+            $sql = "SELECT * FROM besoin_sinistre ORDER BY `date` ASC LIMIT 1";
+            $stmt = $this->db->query($sql);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        }
+
+        $sql = "SELECT * FROM besoin_sinistre WHERE id_status_besoin_sinistre != :id_accepted ORDER BY `date` ASC LIMIT 1";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':id_accepted' => $idAccepted]);
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     // Méthode pour récupérer tous les besoins sinistres
     public function getAllBesoinSinistre()
     {

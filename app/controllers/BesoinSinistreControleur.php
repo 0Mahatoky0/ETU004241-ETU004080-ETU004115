@@ -23,7 +23,7 @@ class BesoinSinistreControleur
         $besoinModel = new BesoinModel(Flight::db());
 
         $villes = $villeModel->getAllVilles();
-        $besoins = $besoinModel->getAllBesoin();
+        $besoins = $besoinModel->getAll();
 
         // Rediriger vers le formulaire avec les données nécessaires
         Flight::render("besoin_sinistre/form", [
@@ -33,6 +33,7 @@ class BesoinSinistreControleur
     }
 
     // Insérer un besoin sinistre à partir des données du formulaire
+    //  avec automatisation pour 
     public function insertBesoinSinistre()
     {
         $data = Flight::request()->data;

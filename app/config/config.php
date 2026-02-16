@@ -48,10 +48,10 @@ return [
 	 **************************************/
 	'database' => [
 		// MySQL Example:
-		'host'     => 'localhost',      // Database host (e.g., 'localhost', 'db.example.com')
+		'host'     => '127.0.0.1',      // Database host (e.g., 'localhost', 'db.example.com')
 		'dbname'   => 'bngrc',   // Database name (e.g., 'flightphp')
-		'user'     => 'php',  // Database user (e.g., 'root')
-		'password' => 'php',  // Database password (never commit real passwords)
+		'user'     => 'root',  // Database user (e.g., 'root')
+		'password' => '',  // Database password (never commit real passwords)
 	],
 
 	// Google OAuth Credentials
