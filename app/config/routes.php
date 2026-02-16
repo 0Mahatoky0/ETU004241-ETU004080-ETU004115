@@ -1,5 +1,7 @@
 <?php
 
+use app\controllers\DonControleur;
+use app\controllers\BesoinSinistreControleur;
 use app\middlewares\SecurityHeadersMiddleware;
 use flight\Engine;
 use flight\net\Router;
@@ -13,16 +15,17 @@ use app\services\BesoinSinistreServices;
 
 $router->group('', function(Router $router) use ($app) {
 
-	$router->get('/', function() use ($app) {
-		$app->redirect('/home');
+	$router->get('/test', function () use ($app) {
+		$app->render('testModels');
 	});
 
-	$router->get('/home', function() use ($app) {
-		$service = new BesoinSinistreServices(Flight::db());
-		$app->render('besoinSinistre/liste', [
-			'besoins' => $service->getNonDistribues()
-		]);
-	});
+	//insertion des dons
+	$router->get('/dons/add',[DonControleur::class,"showFormDom"]);
+	$router->post('/dons/api/add',[DonControleur::class,"insertDon"]);
+
+	//insertion des besoin des sinistrer
+	$router->get('/besoin_sinistre/add',[BesoinSinistreControleur::class,"showForm"]);
+	$router->post('/besoin_sinistre/api/add',[BesoinSinistreControleur::class,"insertBesoinSinistre"]);
 
 }, [ SecurityHeadersMiddleware::class ]);
 

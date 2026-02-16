@@ -3,7 +3,6 @@
 namespace app\models;
 
 use PDO;
-
 class VilleModel {
     private $db;
 
@@ -11,9 +10,14 @@ class VilleModel {
         $this->db = $db;
     }
 
-    public function getAll() {
-        $stmt = $this->db->query('SELECT * FROM ville');
-        return $stmt->fetchAll();
+    // Méthode pour récupérer toutes les villes
+    public function getAllVilles()
+    {
+        $sql = "SELECT * FROM ville";
+
+        $stmt = $this->db->query($sql);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function getById($id) {
