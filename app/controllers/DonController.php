@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\models\BNGRCModel;
+use Exception;
 use Flight;
 
 class DonController {
@@ -17,8 +18,8 @@ class DonController {
     public function saisieDon() {
         $categories = $this->model->getAllCategoriesBesoin();
         
-        Flight::render('dons/saisie', [
-            'categories' => $categories
+        Flight::render('dons/form', [
+            'besoins' => $categories
         ]);
     }
     

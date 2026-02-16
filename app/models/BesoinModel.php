@@ -30,7 +30,7 @@ class BesoinModel
         return $this->db->lastInsertId();
     }
 
-    public function getAllBesoin()
+    public function getAll()
     {
         $sql = "SELECT b.*, cb.libelle as categorie_libelle 
                 FROM besoin b 

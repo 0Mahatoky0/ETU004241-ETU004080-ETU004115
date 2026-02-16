@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use Exception;
 use app\models\BNGRCModel;
 use Flight;
 
@@ -15,13 +16,14 @@ class BesoinController {
     // ===== SAISIE DES BESOINS PAR VILLE =====
     
     public function saisieBesoin() {
-        $regions = $this->model->getAllRegions();
+        // $regions = $this->model->getAllRegions();
+        $villes = $this->model->getAllVilles();
         $categories = $this->model->getAllCategoriesBesoin();
         $status = $this->model->getStatusBesoinSinistre();
         
-        Flight::render('besoins/saisie', [
-            'regions' => $regions,
-            'categories' => $categories,
+        Flight::render('besoin_sinistre/form', [
+            'villes' => $villes,
+            'besoins' => $categories,
             'status' => $status
         ]);
     }

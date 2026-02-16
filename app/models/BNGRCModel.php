@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Flight;
+use Exception;
 use PDO;
 
 class BNGRCModel {
@@ -198,18 +199,16 @@ class BNGRCModel {
                 b.prix_unitaire,
                 cb.libelle as categorie_libelle,
                 v.libelle as ville_libelle,
-                r.libelle as region_libelle,
                 sbs.libelle as status_libelle
             FROM besoin_sinistre bs
             JOIN besoin b ON bs.id_besoin = b.id
             JOIN categorie_besoin cb ON b.id_categorie = cb.id
             JOIN ville v ON bs.id_ville = v.id
-            JOIN region r ON bs.id_region = r.id
-            JOIN status_besoin_sinistre sbs ON bs.id_status_besoin_ville = sbs.id
-            LEFT JOIN mvt_dons md ON bs.id = md.id_besoin_ville
-            GROUP BY bs.id, bs.quantite, b.libelle, b.prix_unitaire, cb.libelle, v.libelle, r.libelle, sbs.libelle
+            JOIN status_besoin_sinistre sbs ON bs.id_status_besoin_sinistre = sbs.id
+            LEFT JOIN mvt_dons md ON bs.id = md.id_besoin_sinistre
+            GROUP BY bs.id, bs.quantite, b.libelle, b.prix_unitaire, cb.libelle, v.libelle, sbs.libelle
             HAVING quantite_restante > 0
-            ORDER BY r.libelle, v.libelle, cb.libelle, b.libelle
+            ORDER BY v.libelle, cb.libelle, b.libelle
         ");
         return $stmt->fetchAll();
     }
@@ -297,7 +296,7 @@ class BNGRCModel {
                 SELECT 
                     bs.quantite - COALESCE(SUM(md.sortie), 0) as quantite_restante
                 FROM besoin_sinistre bs
-                LEFT JOIN mvt_dons md ON bs.id = md.id_besoin_ville
+                LEFT JOIN mvt_dons md ON bs.id = md.id_besoin_sinistre
                 GROUP BY bs.id, bs.quantite
             ) as besoins_status
         ");
@@ -317,7 +316,7 @@ class BNGRCModel {
             FROM region r
             LEFT JOIN ville v ON r.id = v.id_region
             LEFT JOIN besoin_sinistre bs ON v.id = bs.id_ville
-            LEFT JOIN mvt_dons md ON bs.id = md.id_besoin_ville
+            LEFT JOIN mvt_dons md ON bs.id = md.id_besoin_sinistre
             GROUP BY r.id, r.libelle
             ORDER BY r.libelle
         ");
