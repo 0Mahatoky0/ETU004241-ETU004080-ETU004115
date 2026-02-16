@@ -1,69 +1,13 @@
-# Takalo Takalo
+# BNGRC
 
-# Liste des Taches
-    - [] creation base
-        - [ok] table
-            - [ok] role
-                (id, libelle)
-            - [ok] user
-                (id_user, nom, mdp, id_role)
-            - [ok] categorie
-                (id, libelle)
-            - [ok] objets
-                (id_objet, titre, description id_categorie, prix)
-            - [ok] photos
-                (id, id_objet, nom)
-            - [ok] status
-                (id, libelle)
-            - [ok] proprietaire_objet
-                (id, id_user, id_objet, date_echange)
-            - [ok] historique_echange
-                (id, id_objet1, id_objet2, id_status, date_echange)
-        - [] donnees
-
-    - [] Partie 1
-        - [] Back-End 
-
-            - [] fonction                          // Sharon
-                - [] login
-                    - [] insertUser(id_role)
-                    - [] getUser(id_user)
-            - [] BackOffice (admin)                
-                - [] fonction  
-                    - [] login
-                        - [] userExist()
-                        - [] insertAdmin()
-                    - [] gestion categ
-                        - [] insertCategorie()
-                - [] pages
-                    - [] login
-                        - [] login par defaut
-                        - [] gestion categorie
-
-            - [] FrontOffice                        // Bry
-                - [] fonction
-                    - [] insertUtilisateur()
-                    - [] transactionnels
-                        - [] insertObjets()
-                        - [] insertImg
-                    - [] getObjetsByUser()
-                    - [] insertEchange()
-                - [] pages
-                    - [] inscription
-                    - [] login
-                    - [] profile
-                        - [] listObjet
-                        - [] formulaire insertion
-
-                - [] fonction                       // Mahatoky
-                    - [] getAllObjet()
-                    - [] getAllEchangeAttente(id_user)
-                    - [] getAllEchange(id_user, id_status)
-                    - [] acceptEchange(id_historique_echange)
-                    - [] refuserEchange(id_historique_echange)
-                - [] pages
-                    - [] listObjet
-                    - [] proposition    
-
-
+# Conception de Base de Donnee
+    - [] Tables
+        - [] Region (id, libelle)
+        - [] Ville (id, id_region, libelle)
+        - [] categorie_besoin (id, libelle) 
+        - [] status_besoin_sinistre(id, code, libelle) (ACP, ATT)
+        - [] Besoin (id, id_categorie, libelle, prix_unitaire)
+        - [] Besoin_sinistre(id, id_region, id_ville, id_besoin, id_categorie, quantite, id_status_besoin_ville)
+        - [] Dons (id, id_besoin, quantite, source, date)
+        - [] Mvt_Dons (id, id_dons, entrer, sortie, id_besoin_ville, date)
 
