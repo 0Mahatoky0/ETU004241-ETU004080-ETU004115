@@ -12,6 +12,7 @@ use app\controllers\DashboardController;
 use app\controllers\BesoinController;
 use app\controllers\DonController;
 use app\controllers\DispatchController;
+use app\controllers\AchatController;
 use app\middlewares\SecurityHeadersMiddleware;
 use flight\Engine;
 use flight\net\Router;
@@ -101,6 +102,42 @@ $router->get('/dispatch/etat', function() {
 $router->get('/dispatch/details/@id_besoin_sinistre', function($id_besoin_sinistre) {
     $controller = new app\controllers\DispatchController();
     $controller->detailsBesoin($id_besoin_sinistre);
+});
+
+// ===== ROUTES ACHATS =====
+$router->get('/achats/besoins-restants', function() {
+    $controller = new app\controllers\AchatController();
+    $controller->listeBesoinsRestants();
+});
+
+$router->get('/achats/simulation', function() {
+    $controller = new app\controllers\AchatController();
+    $controller->simulationAchat();
+});
+
+$router->post('/achats/api/simuler', function() {
+    $controller = new app\controllers\AchatController();
+    $controller->apiSimulerAchat();
+});
+
+$router->post('/achats/valider', function() {
+    $controller = new app\controllers\AchatController();
+    $controller->validerAchat();
+});
+
+$router->get('/achats/liste', function() {
+    $controller = new app\controllers\AchatController();
+    $controller->listeAchats();
+});
+
+$router->get('/achats/configuration', function() {
+    $controller = new app\controllers\AchatController();
+    $controller->configuration();
+});
+
+$router->post('/achats/configuration', function() {
+    $controller = new app\controllers\AchatController();
+    $controller->configuration();
 });
 
 // ===== API ROUTES =====

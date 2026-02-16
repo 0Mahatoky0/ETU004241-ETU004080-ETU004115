@@ -266,6 +266,172 @@ class BNGRCModel {
         }
     }
     
+    // ===== GESTION DES ACHATS =====
+    
+    public function getConfiguration() {
+        $stmt = $this->db->query("SELECT * FROM configuration ORDER BY id DESC LIMIT 1");
+        return $stmt->fetch();
+    }
+    
+    public function updateFraisAchat($frais_percent) {
+        $stmt = $this->db->prepare("UPDATE configuration SET frais_achat_percent = ?, updated_at = CURRENT_TIMESTAMP");
+        return $stmt->execute([$frais_percent]);
+    }
+    
+    public function getBesoinsRestantsPourAchat($id_ville = null) {
+        $sql = "
+            SELECT 
+                bs.id as besoin_sinistre_id,
+                bs.id_besoin,
+                bs.id_ville,
+                bs.quantite as quantite_requise,
+                COALESCE(SUM(md.sortie), 0) as quantite_assignee,
+                bs.quantite - COALESCE(SUM(md.sortie), 0) as quantite_restante,
+                b.libelle as besoin_libelle,
+                b.prix_unitaire,
+                cb.libelle as categorie_libelle,
+                v.libelle as ville_libelle,
+                r.libelle as region_libelle,
+                sbs.libelle as status_libelle
+            FROM besoin_sinistre bs
+            JOIN besoin b ON bs.id_besoin = b.id
+            JOIN categorie_besoin cb ON b.id_categorie = cb.id
+            JOIN ville v ON bs.id_ville = v.id
+            JOIN region r ON bs.id_region = r.id
+            JOIN status_besoin_sinistre sbs ON bs.id_status_besoin_ville = sbs.id
+            LEFT JOIN mvt_dons md ON bs.id = md.id_besoin_ville
+        ";
+        
+        if ($id_ville) {
+            $sql .= " WHERE bs.id_ville = ?";
+        }
+        
+        $sql .= "
+            GROUP BY bs.id, bs.id_besoin, bs.id_ville, bs.quantite, b.libelle, b.prix_unitaire, cb.libelle, v.libelle, r.libelle, sbs.libelle
+            HAVING quantite_restante > 0
+            ORDER BY r.libelle, v.libelle, cb.libelle, b.libelle
+        ";
+        
+        $stmt = $this->db->prepare($sql);
+        if ($id_ville) {
+            $stmt->execute([$id_ville]);
+        } else {
+            $stmt->execute();
+        }
+        return $stmt->fetchAll();
+    }
+    
+    public function createAchat($id_besoin, $id_ville, $quantite, $prix_unitaire, $frais_percent, $montant_brut, $montant_frais, $montant_total) {
+        $stmt = $this->db->prepare("
+            INSERT INTO achat (id_besoin, id_ville, quantite, prix_unitaire, frais_percent, montant_brut, montant_frais, montant_total, date_achat) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        ");
+        return $stmt->execute([$id_besoin, $id_ville, $quantite, $prix_unitaire, $frais_percent, $montant_brut, $montant_frais, $montant_total]);
+    }
+    
+    public function getAllAchats($id_ville = null, $date_debut = null, $date_fin = null, $id_categorie = null) {
+        $sql = "
+            SELECT 
+                a.*,
+                b.libelle as besoin_libelle,
+                cb.libelle as categorie_libelle,
+                v.libelle as ville_libelle,
+                r.libelle as region_libelle
+            FROM achat a
+            JOIN besoin b ON a.id_besoin = b.id
+            JOIN categorie_besoin cb ON b.id_categorie = cb.id
+            JOIN ville v ON a.id_ville = v.id
+            JOIN region r ON v.id_region = r.id
+            WHERE 1=1
+        ";
+        
+        $params = [];
+        
+        if ($id_ville) {
+            $sql .= " AND a.id_ville = ?";
+            $params[] = $id_ville;
+        }
+        
+        if ($date_debut) {
+            $sql .= " AND a.date_achat >= ?";
+            $params[] = $date_debut;
+        }
+        
+        if ($date_fin) {
+            $sql .= " AND a.date_achat <= ?";
+            $params[] = $date_fin;
+        }
+        
+        if ($id_categorie) {
+            $sql .= " AND b.id_categorie = ?";
+            $params[] = $id_categorie;
+        }
+        
+        $sql .= " ORDER BY a.date_achat DESC";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll();
+    }
+    
+    public function validerAchat($id_besoin_sinistre, $quantite, $id_besoin, $id_ville, $prix_unitaire) {
+        $this->db->beginTransaction();
+        
+        try {
+            // Récupérer la configuration des frais
+            $config = $this->getConfiguration();
+            $frais_percent = $config['frais_achat_percent'];
+            
+            // Calculer les montants
+            $montant_brut = $quantite * $prix_unitaire;
+            $montant_frais = $montant_brut * $frais_percent / 100;
+            $montant_total = $montant_brut + $montant_frais;
+            
+            // Créer l'achat
+            $this->createAchat($id_besoin, $id_ville, $quantite, $prix_unitaire, $frais_percent, $montant_brut, $montant_frais, $montant_total);
+            
+            // Mettre à jour la quantité restante dans besoin_sinistre
+            $stmt = $this->db->prepare("
+                UPDATE besoin_sinistre 
+                SET quantite = quantite - ? 
+                WHERE id = ? AND quantite >= ?
+            ");
+            $result = $stmt->execute([$quantite, $id_besoin_sinistre, $quantite]);
+            
+            if (!$result || $stmt->rowCount() === 0) {
+                throw new Exception("Quantité insuffisante ou besoin non trouvé");
+            }
+            
+            $this->db->commit();
+            return [
+                'success' => true,
+                'montant_brut' => $montant_brut,
+                'montant_frais' => $montant_frais,
+                'montant_total' => $montant_total
+            ];
+            
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            throw $e;
+        }
+    }
+    
+    public function simulerAchat($quantite, $prix_unitaire) {
+        $config = $this->getConfiguration();
+        $frais_percent = $config['frais_achat_percent'];
+        
+        $montant_brut = $quantite * $prix_unitaire;
+        $montant_frais = $montant_brut * $frais_percent / 100;
+        $montant_total = $montant_brut + $montant_frais;
+        
+        return [
+            'montant_brut' => $montant_brut,
+            'montant_frais' => $montant_frais,
+            'montant_total' => $montant_total,
+            'frais_percent' => $frais_percent
+        ];
+    }
+    
     // ===== TABLEAU DE BORD =====
     
     public function getDashboardStats() {

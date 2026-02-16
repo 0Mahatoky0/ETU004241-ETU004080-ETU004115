@@ -49,12 +49,9 @@ return [
 	'database' => [
 		// MySQL Example:
 		'host'     => 'localhost',      // Database host (e.g., 'localhost', 'db.example.com')
-		'dbname'   => 'takalo_takalo',   // Database name (e.g., 'flightphp')
+		'dbname'   => 'bngrc',   // Database name (e.g., 'flightphp')
 		'user'     => 'sharon',  // Database user (e.g., 'root')
 		'password' => 'sharon',  // Database password (never commit real passwords)
-
-		'dbname'   => 'bngrc',
-	
 	],
 
 	// Google OAuth Credentials
