@@ -16,7 +16,7 @@ INSERT INTO categorie_besoin (id, libelle) VALUES
 -- Données pour la table status_besoin_sinistre
 INSERT INTO status_besoin_sinistre (id, code, libelle) VALUES
 	(1, 'ACP', 'Accepte'),
-	(2, 'ATT', 'En attente');
+	(2, '	', 'En attente');
 
 -- Données pour la table besoin
 INSERT INTO besoin (id, id_categorie, libelle, prix_unitaire) VALUES

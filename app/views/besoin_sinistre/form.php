@@ -30,10 +30,6 @@
         <input type="number" name="quantite" id="quantite" required>
         <br><br>
 
-        <label for="id_status_besoin_sinistre">Statut :</label>
-        <input type="number" name="id_status_besoin_sinistre" id="id_status_besoin_sinistre" required>
-        <br><br>
-
         <button type="submit">Ajouter le Besoin Sinistre</button>
     </form>
 </body>

@@ -40,10 +40,9 @@ class BesoinSinistreControleur
         $id_ville = $data->id_ville;
         $id_besoin = $data->id_besoin;
         $quantite = $data->quantite;
-        $id_status_besoin_sinistre = $data->id_status_besoin_sinistre;
 
         $besoinSinistreModel = new BesoinSinistreModel(Flight::db());
-        $result = $besoinSinistreModel->insertBesoinSinistre($id_ville, $id_besoin, $quantite, $id_status_besoin_sinistre);
+        $result = $besoinSinistreModel->addBesoinSinistre($id_ville, $id_besoin, $quantite);
 
         if ($result) {
             Flight::json(["success" => true, "message" => "Besoin sinistre ajouté avec succès"]);

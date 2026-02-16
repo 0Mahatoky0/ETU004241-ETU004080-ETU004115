@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use Flight;
 use PDO;
 
 class BesoinSinistreModel
@@ -11,6 +12,12 @@ class BesoinSinistreModel
     public function __construct($db)
     {
         $this->db = $db;
+    }
+
+    public function addBesoinSinistre($id_ville, $id_besoin, $quantite) {
+        $statusSinitreModel = new StatusBesoinSinistreModel(Flight::db());
+        $idStat = $statusSinitreModel->getIdByCode("ATT")["id"];
+        return $this->insertBesoinSinistre($id_ville, $id_besoin, $quantite,$idStat);
     }
 
     // Méthode pour insérer un besoin sinistre
