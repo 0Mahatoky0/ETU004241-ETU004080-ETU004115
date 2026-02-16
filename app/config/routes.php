@@ -17,6 +17,10 @@ $router->group('', function(Router $router) use ($app) {
 		$app->render('testModels');
 	});
 
+	$router->get('/', function () use ($app) {
+		$app->render('dashbord');
+	});
+
 	//insertion des dons
 	$router->group('/dons', function() use ($router,$app) {
 		$router->get('/add',[DonControleur::class,"showFormDom"]);
