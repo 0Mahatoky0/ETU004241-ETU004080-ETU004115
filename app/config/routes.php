@@ -1,5 +1,6 @@
 <?php
 
+use app\controllers\DonControleur;
 use app\controllers\AuthController;
 use app\controllers\CategorieController;
 use app\controllers\ObjetController;
@@ -24,20 +25,7 @@ $villeController = new VilleController($app);
 
 $router->group('', function(Router $router) use ($app, $villeController) {
 
-	// Route pour le tableau de bord (page d'accueil)
-	$router->get('/', function() {
-		require __DIR__ . '/../views/dashboard.php';
-	});
-	
-	// Routes pour les villes
-	$router->get('/villes', [$villeController, 'index']);
-	$router->get('/villes/@id', [$villeController, 'show']);
-	$router->get('/api/villes', [$villeController, 'apiIndex']);
-	
-	// Route pour le tableau de bord original
-	$router->get('/dashboard', function() {
-		require __DIR__ . '/../views/dashboard.php';
-	});
+	//$router->get('/', [$authController, 'showRegister']);
 
 }, [ SecurityHeadersMiddleware::class ]);
 
