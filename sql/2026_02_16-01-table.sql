@@ -49,7 +49,7 @@ CREATE TABLE dons (
 	date DATETIME
 );
 
-CREATE TABLE mvt_Dons (
+CREATE TABLE mvt_dons (
 	id INT,
 	id_dons INT,
 	entrer INT,

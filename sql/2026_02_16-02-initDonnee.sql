@@ -35,6 +35,6 @@ INSERT INTO dons (id, id_besoin, quantite, source, date) VALUES
 	(2, 2, 5, 'Particulier B', '2026-02-16 09:30:00');
 
 -- Données pour la table mvt_Dons
-INSERT INTO mvt_Dons (id, id_dons, entrer, sortie, id_besoin_ville, date) VALUES
+INSERT INTO mvt_dons (id, id_dons, entrer, sortie, id_besoin_ville, date) VALUES
 	(1, 1, 50, 0, 1, '2026-02-15 11:00:00'),
 	(2, 2, 5, 0, 2, '2026-02-16 10:00:00');
