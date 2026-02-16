@@ -11,3 +11,19 @@
         - [] Dons (id, id_besoin, quantite, source, date)
         - [] Mvt_Dons (id, id_dons, entrer, sortie, id_besoin_ville, date)
 
+    - [] Fonctionnalite
+        - [] mouvement_dons (distribution)
+
+            - [] fonction
+                - [] insertionMvtDons()
+                    - [] creation views "v_dispatch_dons"
+                        - mvt_dons et dons en add colonne reste => somme (entre - sortie) group by id_dons
+                - [] recupereBesoinSinistre() // non-distribuer
+                - [] listeDonsDansVille(id_ville)
+
+            - [] views
+                - dossier (besoinSinistre)
+                    - liste.php
+            
+            
+
