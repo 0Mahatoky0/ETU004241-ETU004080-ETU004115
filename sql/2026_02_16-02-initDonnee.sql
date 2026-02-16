@@ -24,9 +24,9 @@ INSERT INTO besoin (id, id_categorie, libelle, prix_unitaire) VALUES
 	(2, 2, 'Clou', 50000.00);
 
 -- Données pour la table besoin_sinistre (SANS id_categorie)
-INSERT INTO besoin_sinistre (id, id_region, id_ville, id_besoin, quantite, id_status_besoin_sinistre) VALUES
-	(1, 1, 1, 1, 100, 1),
-	(2, 2, 2, 2, 10, 2);
+INSERT INTO besoin_sinistre (id, id_ville, id_besoin, quantite, id_status_besoin_sinistre) VALUES
+	(1, 1, 1, 100, 1),
+	(2, 2, 2, 10, 2);
 
 -- Données pour la table dons
 INSERT INTO dons (id, id_besoin, quantite, source, date) VALUES
