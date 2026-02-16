@@ -1,3 +1,4 @@
+
 -- Données pour la table region
 INSERT INTO region (id, libelle) VALUES
 	(1, 'Analamanga'),
@@ -11,7 +12,7 @@ INSERT INTO ville (id, id_region, libelle) VALUES
 -- Données pour la table categorie_besoin
 INSERT INTO categorie_besoin (id, libelle) VALUES
 	(1, 'Nature'),
-	(2, 'Matériaux');
+	(2, 'materiaux');
 
 -- Données pour la table status_besoin_sinistre
 INSERT INTO status_besoin_sinistre (id, code, libelle) VALUES

@@ -25,6 +25,7 @@ CREATE TABLE status_besoin_sinistre (
     libelle VARCHAR(255)
 );
 
+
 CREATE TABLE besoin (
     id INT AUTO_INCREMENT PRIMARY KEY,
     id_categorie INT NOT NULL,
@@ -32,6 +33,7 @@ CREATE TABLE besoin (
     prix_unitaire DECIMAL(10,2),
     FOREIGN KEY (id_categorie) REFERENCES categorie_besoin(id)
 );
+
 
 CREATE TABLE besoin_sinistre (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -45,6 +47,7 @@ CREATE TABLE besoin_sinistre (
     FOREIGN KEY (id_status_besoin_sinistre) REFERENCES status_besoin_sinistre(id)
 );
 
+
 CREATE TABLE dons (
     id INT AUTO_INCREMENT PRIMARY KEY,
     id_besoin INT NOT NULL,
@@ -53,6 +56,7 @@ CREATE TABLE dons (
     date DATETIME,
     FOREIGN KEY (id_besoin) REFERENCES besoin(id)
 );
+
 
 CREATE TABLE mvt_dons (
     id INT AUTO_INCREMENT PRIMARY KEY,

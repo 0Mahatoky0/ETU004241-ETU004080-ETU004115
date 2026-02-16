@@ -1,0 +1,326 @@
+<?php
+
+namespace app\models;
+
+use Flight;
+use PDO;
+
+class BNGRCModel {
+    private $db;
+    
+    public function __construct() {
+        $this->db = Flight::db();
+    }
+    
+    // ===== GESTION DES VILLES =====
+    
+    public function getAllRegions() {
+        $stmt = $this->db->query("SELECT * FROM region ORDER BY libelle");
+        return $stmt->fetchAll();
+    }
+    
+    public function getVillesByRegion($id_region) {
+        $stmt = $this->db->prepare("SELECT * FROM ville WHERE id_region = ? ORDER BY libelle");
+        $stmt->execute([$id_region]);
+        return $stmt->fetchAll();
+    }
+    
+    public function getAllVilles() {
+        $stmt = $this->db->query("
+            SELECT v.*, r.libelle as region_libelle 
+            FROM ville v 
+            JOIN region r ON v.id_region = r.id 
+            ORDER BY r.libelle, v.libelle
+        ");
+        return $stmt->fetchAll();
+    }
+    
+    // ===== GESTION DES BESOINS =====
+    
+    public function getAllCategoriesBesoin() {
+        $stmt = $this->db->query("SELECT * FROM categorie_besoin ORDER BY libelle");
+        return $stmt->fetchAll();
+    }
+    
+    public function getBesoinsByCategorie($id_categorie) {
+        $stmt = $this->db->prepare("SELECT * FROM besoin WHERE id_categorie = ? ORDER BY libelle");
+        $stmt->execute([$id_categorie]);
+        return $stmt->fetchAll();
+    }
+    
+    public function getAllBesoins() {
+        $stmt = $this->db->query("
+            SELECT b.*, cb.libelle as categorie_libelle 
+            FROM besoin b 
+            JOIN categorie_besoin cb ON b.id_categorie = cb.id 
+            ORDER BY cb.libelle, b.libelle
+        ");
+        return $stmt->fetchAll();
+    }
+    
+    public function getStatusBesoinSinistre() {
+        $stmt = $this->db->query("SELECT * FROM status_besoin_sinistre ORDER BY libelle");
+        return $stmt->fetchAll();
+    }
+    
+    // ===== SAISIE DES BESOINS PAR VILLE =====
+    
+    public function createBesoinSinistre($id_region, $id_ville, $id_besoin, $quantite, $id_status = 2) {
+        $stmt = $this->db->prepare("
+            INSERT INTO besoin_sinistre (id_region, id_ville, id_besoin, quantite, id_status_besoin_ville) 
+            VALUES (?, ?, ?, ?, ?)
+        ");
+        return $stmt->execute([$id_region, $id_ville, $id_besoin, $quantite, $id_status]);
+    }
+    
+    public function getBesoinsSinistreByVille($id_ville) {
+        $stmt = $this->db->prepare("
+            SELECT bs.*, bs.quantite as quantite_requise, b.libelle as besoin_libelle, b.prix_unitaire, 
+                   cb.libelle as categorie_libelle, sbs.libelle as status_libelle,
+                   v.libelle as ville_libelle, r.libelle as region_libelle
+            FROM besoin_sinistre bs
+            JOIN besoin b ON bs.id_besoin = b.id
+            JOIN categorie_besoin cb ON b.id_categorie = cb.id
+            JOIN status_besoin_sinistre sbs ON bs.id_status_besoin_ville = sbs.id
+            JOIN ville v ON bs.id_ville = v.id
+            JOIN region r ON bs.id_region = r.id
+            WHERE bs.id_ville = ?
+            ORDER BY cb.libelle, b.libelle
+        ");
+        $stmt->execute([$id_ville]);
+        return $stmt->fetchAll();
+    }
+    
+    public function getAllBesoinsSinistre() {
+        $stmt = $this->db->query("
+            SELECT bs.*, bs.quantite as quantite_requise, b.libelle as besoin_libelle, b.prix_unitaire, 
+                   cb.libelle as categorie_libelle, sbs.libelle as status_libelle,
+                   v.libelle as ville_libelle, r.libelle as region_libelle
+            FROM besoin_sinistre bs
+            JOIN besoin b ON bs.id_besoin = b.id
+            JOIN categorie_besoin cb ON b.id_categorie = cb.id
+            JOIN status_besoin_sinistre sbs ON bs.id_status_besoin_ville = sbs.id
+            JOIN ville v ON bs.id_ville = v.id
+            JOIN region r ON bs.id_region = r.id
+            ORDER BY r.libelle, v.libelle, cb.libelle, b.libelle
+        ");
+        return $stmt->fetchAll();
+    }
+    
+    // ===== GESTION DES DONS =====
+    
+    public function createDon($id_besoin, $quantite, $source) {
+        $stmt = $this->db->prepare("
+            INSERT INTO dons (id_besoin, quantite, source, date) 
+            VALUES (?, ?, ?, NOW())
+        ");
+        $stmt->execute([$id_besoin, $quantite, $source]);
+        return $this->db->lastInsertId();
+    }
+    
+    public function getAllDons() {
+        $stmt = $this->db->query("
+            SELECT d.*, b.libelle as besoin_libelle, cb.libelle as categorie_libelle
+            FROM dons d
+            JOIN besoin b ON d.id_besoin = b.id
+            JOIN categorie_besoin cb ON b.id_categorie = cb.id
+            ORDER BY d.date DESC
+        ");
+        return $stmt->fetchAll();
+    }
+    
+    public function getDonsByBesoin($id_besoin) {
+        $stmt = $this->db->prepare("
+            SELECT d.*, b.libelle as besoin_libelle, cb.libelle as categorie_libelle
+            FROM dons d
+            JOIN besoin b ON d.id_besoin = b.id
+            JOIN categorie_besoin cb ON b.id_categorie = cb.id
+            WHERE d.id_besoin = ?
+            ORDER BY d.date DESC
+        ");
+        $stmt->execute([$id_besoin]);
+        return $stmt->fetchAll();
+    }
+    
+    // ===== MOUVEMENTS DE DONS =====
+    
+    public function createMouvementDon($id_dons, $entrer, $sortie, $id_besoin_ville = null) {
+        $stmt = $this->db->prepare("
+            INSERT INTO mvt_dons (id_dons, entrer, sortie, id_besoin_ville, date) 
+            VALUES (?, ?, ?, ?, NOW())
+        ");
+        return $stmt->execute([$id_dons, $entrer, $sortie, $id_besoin_ville]);
+    }
+    
+    public function getAllMouvementsDons() {
+        $stmt = $this->db->query("
+            SELECT md.*, d.source as don_source, b.libelle as besoin_libelle,
+                   bs.quantite as besoin_quantite, v.libelle as ville_libelle
+            FROM mvt_dons md
+            JOIN dons d ON md.id_dons = d.id
+            JOIN besoin b ON d.id_besoin = b.id
+            LEFT JOIN besoin_sinistre bs ON md.id_besoin_ville = bs.id
+            LEFT JOIN ville v ON bs.id_ville = v.id
+            ORDER BY md.date DESC
+        ");
+        return $stmt->fetchAll();
+    }
+    
+    // ===== SIMULATION DE DISPATCH =====
+    
+    public function getStockDisponible() {
+        $stmt = $this->db->query("
+            SELECT 
+                b.id as besoin_id,
+                b.libelle as besoin_libelle,
+                cb.libelle as categorie_libelle,
+                b.prix_unitaire,
+                COALESCE(SUM(md.entrer), 0) - COALESCE(SUM(md.sortie), 0) as stock_disponible
+            FROM besoin b
+            JOIN categorie_besoin cb ON b.id_categorie = cb.id
+            LEFT JOIN dons d ON b.id = d.id_besoin
+            LEFT JOIN mvt_dons md ON d.id = md.id_dons
+            GROUP BY b.id, b.libelle, cb.libelle, b.prix_unitaire
+            HAVING stock_disponible > 0
+            ORDER BY cb.libelle, b.libelle
+        ");
+        return $stmt->fetchAll();
+    }
+    
+    public function getBesoinsNonSatisfaits() {
+        $stmt = $this->db->query("
+            SELECT 
+                bs.id,
+                bs.quantite as quantite_requise,
+                COALESCE(SUM(md.sortie), 0) as quantite_assignee,
+                bs.quantite - COALESCE(SUM(md.sortie), 0) as quantite_restante,
+                b.libelle as besoin_libelle,
+                b.prix_unitaire,
+                cb.libelle as categorie_libelle,
+                v.libelle as ville_libelle,
+                r.libelle as region_libelle,
+                sbs.libelle as status_libelle
+            FROM besoin_sinistre bs
+            JOIN besoin b ON bs.id_besoin = b.id
+            JOIN categorie_besoin cb ON b.id_categorie = cb.id
+            JOIN ville v ON bs.id_ville = v.id
+            JOIN region r ON bs.id_region = r.id
+            JOIN status_besoin_sinistre sbs ON bs.id_status_besoin_ville = sbs.id
+            LEFT JOIN mvt_dons md ON bs.id = md.id_besoin_ville
+            GROUP BY bs.id, bs.quantite, b.libelle, b.prix_unitaire, cb.libelle, v.libelle, r.libelle, sbs.libelle
+            HAVING quantite_restante > 0
+            ORDER BY r.libelle, v.libelle, cb.libelle, b.libelle
+        ");
+        return $stmt->fetchAll();
+    }
+    
+    public function simulerDispatch($id_besoin_sinistre, $quantite) {
+        $this->db->beginTransaction();
+        
+        try {
+            // Récupérer le besoin
+            $stmt = $this->db->prepare("SELECT * FROM besoin_sinistre WHERE id = ?");
+            $stmt->execute([$id_besoin_sinistre]);
+            $besoin = $stmt->fetch();
+            
+            if (!$besoin) {
+                throw new Exception("Besoin non trouvé");
+            }
+            
+            // Récupérer les dons disponibles pour ce besoin
+            $stmt = $this->db->prepare("
+                SELECT d.*, COALESCE(SUM(md.entrer), 0) - COALESCE(SUM(md.sortie), 0) as stock_disponible
+                FROM dons d
+                LEFT JOIN mvt_dons md ON d.id = md.id_dons
+                WHERE d.id_besoin = ?
+                GROUP BY d.id
+                HAVING stock_disponible > 0
+                ORDER BY d.date ASC
+            ");
+            $stmt->execute([$besoin['id_besoin']]);
+            $dons_disponibles = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            $quantite_a_allouer = $quantite;
+            
+            foreach ($dons_disponibles as $don) {
+                if ($quantite_a_allouer <= 0) break;
+                
+                $quantite_pouvant_allouer = min($quantite_a_allouer, $don['stock_disponible']);
+                
+                // Créer le mouvement de sortie
+                $this->createMouvementDon($don['id'], 0, $quantite_pouvant_allouer, $id_besoin_sinistre);
+                
+                $quantite_a_allouer -= $quantite_pouvant_allouer;
+            }
+            
+            if ($quantite_a_allouer > 0) {
+                throw new Exception("Stock insuffisant pour allouer la quantité demandée");
+            }
+            
+            $this->db->commit();
+            return true;
+            
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            throw $e;
+        }
+    }
+    
+    // ===== TABLEAU DE BORD =====
+    
+    public function getDashboardStats() {
+        $stats = [];
+        
+        // Total des besoins
+        $stmt = $this->db->query("SELECT COUNT(*) as total, SUM(quantite) as quantite_totale FROM besoin_sinistre");
+        $stats['besoins'] = $stmt->fetch();
+        
+        // Total des dons
+        $stmt = $this->db->query("SELECT COUNT(*) as total, SUM(quantite) as quantite_totale FROM dons");
+        $stats['dons'] = $stmt->fetch();
+        
+        // Stock disponible
+        $stmt = $this->db->query("
+            SELECT SUM(COALESCE(md.entrer, 0) - COALESCE(md.sortie, 0)) as stock_total
+            FROM mvt_dons md
+        ");
+        $stock_result = $stmt->fetch();
+        $stats['stock'] = $stock_result['stock_total'] ?? 0;
+        
+        // Besoins satisfaits vs restants
+        $stmt = $this->db->query("
+            SELECT 
+                SUM(CASE WHEN quantite_restante = 0 THEN 1 ELSE 0 END) as satisfaits,
+                SUM(CASE WHEN quantite_restante > 0 THEN 1 ELSE 0 END) as non_satisfaits,
+                COUNT(*) as total
+            FROM (
+                SELECT 
+                    bs.quantite - COALESCE(SUM(md.sortie), 0) as quantite_restante
+                FROM besoin_sinistre bs
+                LEFT JOIN mvt_dons md ON bs.id = md.id_besoin_ville
+                GROUP BY bs.id, bs.quantite
+            ) as besoins_status
+        ");
+        $stats['satisfaction'] = $stmt->fetch();
+        
+        return $stats;
+    }
+    
+    public function getDashboardByRegion() {
+        $stmt = $this->db->query("
+            SELECT 
+                r.libelle as region_libelle,
+                COUNT(DISTINCT bs.id) as nombre_besoins,
+                SUM(bs.quantite) as quantite_totale_besoins,
+                COALESCE(SUM(md.sortie), 0) as quantite_allouee,
+                SUM(bs.quantite) - COALESCE(SUM(md.sortie), 0) as quantite_restante
+            FROM region r
+            LEFT JOIN ville v ON r.id = v.id_region
+            LEFT JOIN besoin_sinistre bs ON v.id = bs.id_ville
+            LEFT JOIN mvt_dons md ON bs.id = md.id_besoin_ville
+            GROUP BY r.id, r.libelle
+            ORDER BY r.libelle
+        ");
+        return $stmt->fetchAll();
+    }
+}
