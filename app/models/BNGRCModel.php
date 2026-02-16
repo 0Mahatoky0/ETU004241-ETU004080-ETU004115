@@ -1,5 +1,10 @@
 <?php
 
+namespace app\models;
+
+use Flight;
+use PDO;
+
 class BNGRCModel {
     private $db;
     
@@ -11,13 +16,13 @@ class BNGRCModel {
     
     public function getAllRegions() {
         $stmt = $this->db->query("SELECT * FROM region ORDER BY libelle");
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll();
     }
     
     public function getVillesByRegion($id_region) {
         $stmt = $this->db->prepare("SELECT * FROM ville WHERE id_region = ? ORDER BY libelle");
         $stmt->execute([$id_region]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll();
     }
     
     public function getAllVilles() {
@@ -27,20 +32,20 @@ class BNGRCModel {
             JOIN region r ON v.id_region = r.id 
             ORDER BY r.libelle, v.libelle
         ");
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll();
     }
     
     // ===== GESTION DES BESOINS =====
     
     public function getAllCategoriesBesoin() {
         $stmt = $this->db->query("SELECT * FROM categorie_besoin ORDER BY libelle");
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll();
     }
     
     public function getBesoinsByCategorie($id_categorie) {
         $stmt = $this->db->prepare("SELECT * FROM besoin WHERE id_categorie = ? ORDER BY libelle");
         $stmt->execute([$id_categorie]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll();
     }
     
     public function getAllBesoins() {
@@ -50,19 +55,19 @@ class BNGRCModel {
             JOIN categorie_besoin cb ON b.id_categorie = cb.id 
             ORDER BY cb.libelle, b.libelle
         ");
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll();
     }
     
     public function getStatusBesoinSinistre() {
         $stmt = $this->db->query("SELECT * FROM status_besoin_sinistre ORDER BY libelle");
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll();
     }
     
     // ===== SAISIE DES BESOINS PAR VILLE =====
     
     public function createBesoinSinistre($id_region, $id_ville, $id_besoin, $quantite, $id_status = 2) {
         $stmt = $this->db->prepare("
-            INSERT INTO besoin_sinistre (id_region, id_ville, id_besoin, quantite, id_status_besoin_sinistre) 
+            INSERT INTO besoin_sinistre (id_region, id_ville, id_besoin, quantite, id_status_besoin_ville) 
             VALUES (?, ?, ?, ?, ?)
         ");
         return $stmt->execute([$id_region, $id_ville, $id_besoin, $quantite, $id_status]);
@@ -70,36 +75,36 @@ class BNGRCModel {
     
     public function getBesoinsSinistreByVille($id_ville) {
         $stmt = $this->db->prepare("
-            SELECT bs.*, b.libelle as besoin_libelle, b.prix_unitaire, 
+            SELECT bs.*, bs.quantite as quantite_requise, b.libelle as besoin_libelle, b.prix_unitaire, 
                    cb.libelle as categorie_libelle, sbs.libelle as status_libelle,
                    v.libelle as ville_libelle, r.libelle as region_libelle
             FROM besoin_sinistre bs
             JOIN besoin b ON bs.id_besoin = b.id
             JOIN categorie_besoin cb ON b.id_categorie = cb.id
-            JOIN status_besoin_sinistre sbs ON bs.id_status_besoin_sinistre = sbs.id
+            JOIN status_besoin_sinistre sbs ON bs.id_status_besoin_ville = sbs.id
             JOIN ville v ON bs.id_ville = v.id
             JOIN region r ON bs.id_region = r.id
             WHERE bs.id_ville = ?
             ORDER BY cb.libelle, b.libelle
         ");
         $stmt->execute([$id_ville]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll();
     }
     
     public function getAllBesoinsSinistre() {
         $stmt = $this->db->query("
-            SELECT bs.*, b.libelle as besoin_libelle, b.prix_unitaire, 
+            SELECT bs.*, bs.quantite as quantite_requise, b.libelle as besoin_libelle, b.prix_unitaire, 
                    cb.libelle as categorie_libelle, sbs.libelle as status_libelle,
                    v.libelle as ville_libelle, r.libelle as region_libelle
             FROM besoin_sinistre bs
             JOIN besoin b ON bs.id_besoin = b.id
             JOIN categorie_besoin cb ON b.id_categorie = cb.id
-            JOIN status_besoin_sinistre sbs ON bs.id_status_besoin_sinistre = sbs.id
+            JOIN status_besoin_sinistre sbs ON bs.id_status_besoin_ville = sbs.id
             JOIN ville v ON bs.id_ville = v.id
             JOIN region r ON bs.id_region = r.id
             ORDER BY r.libelle, v.libelle, cb.libelle, b.libelle
         ");
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll();
     }
     
     // ===== GESTION DES DONS =====
@@ -121,7 +126,7 @@ class BNGRCModel {
             JOIN categorie_besoin cb ON b.id_categorie = cb.id
             ORDER BY d.date DESC
         ");
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll();
     }
     
     public function getDonsByBesoin($id_besoin) {
@@ -134,17 +139,17 @@ class BNGRCModel {
             ORDER BY d.date DESC
         ");
         $stmt->execute([$id_besoin]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll();
     }
     
     // ===== MOUVEMENTS DE DONS =====
     
-    public function createMouvementDon($id_dons, $entrer, $sortie, $id_besoin_sinistre = null) {
+    public function createMouvementDon($id_dons, $entrer, $sortie, $id_besoin_ville = null) {
         $stmt = $this->db->prepare("
-            INSERT INTO mvt_dons (id_dons, entrer, sortie, id_besoin_sinistre, date) 
+            INSERT INTO mvt_dons (id_dons, entrer, sortie, id_besoin_ville, date) 
             VALUES (?, ?, ?, ?, NOW())
         ");
-        return $stmt->execute([$id_dons, $entrer, $sortie, $id_besoin_sinistre]);
+        return $stmt->execute([$id_dons, $entrer, $sortie, $id_besoin_ville]);
     }
     
     public function getAllMouvementsDons() {
@@ -154,11 +159,11 @@ class BNGRCModel {
             FROM mvt_dons md
             JOIN dons d ON md.id_dons = d.id
             JOIN besoin b ON d.id_besoin = b.id
-            LEFT JOIN besoin_sinistre bs ON md.id_besoin_sinistre = bs.id
+            LEFT JOIN besoin_sinistre bs ON md.id_besoin_ville = bs.id
             LEFT JOIN ville v ON bs.id_ville = v.id
             ORDER BY md.date DESC
         ");
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll();
     }
     
     // ===== SIMULATION DE DISPATCH =====
@@ -179,7 +184,7 @@ class BNGRCModel {
             HAVING stock_disponible > 0
             ORDER BY cb.libelle, b.libelle
         ");
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll();
     }
     
     public function getBesoinsNonSatisfaits() {
@@ -200,13 +205,13 @@ class BNGRCModel {
             JOIN categorie_besoin cb ON b.id_categorie = cb.id
             JOIN ville v ON bs.id_ville = v.id
             JOIN region r ON bs.id_region = r.id
-            JOIN status_besoin_sinistre sbs ON bs.id_status_besoin_sinistre = sbs.id
-            LEFT JOIN mvt_dons md ON bs.id = md.id_besoin_sinistre
+            JOIN status_besoin_sinistre sbs ON bs.id_status_besoin_ville = sbs.id
+            LEFT JOIN mvt_dons md ON bs.id = md.id_besoin_ville
             GROUP BY bs.id, bs.quantite, b.libelle, b.prix_unitaire, cb.libelle, v.libelle, r.libelle, sbs.libelle
             HAVING quantite_restante > 0
             ORDER BY r.libelle, v.libelle, cb.libelle, b.libelle
         ");
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll();
     }
     
     public function simulerDispatch($id_besoin_sinistre, $quantite) {
@@ -216,7 +221,7 @@ class BNGRCModel {
             // Récupérer le besoin
             $stmt = $this->db->prepare("SELECT * FROM besoin_sinistre WHERE id = ?");
             $stmt->execute([$id_besoin_sinistre]);
-            $besoin = $stmt->fetch(PDO::FETCH_ASSOC);
+            $besoin = $stmt->fetch();
             
             if (!$besoin) {
                 throw new Exception("Besoin non trouvé");
@@ -268,18 +273,18 @@ class BNGRCModel {
         
         // Total des besoins
         $stmt = $this->db->query("SELECT COUNT(*) as total, SUM(quantite) as quantite_totale FROM besoin_sinistre");
-        $stats['besoins'] = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stats['besoins'] = $stmt->fetch();
         
         // Total des dons
         $stmt = $this->db->query("SELECT COUNT(*) as total, SUM(quantite) as quantite_totale FROM dons");
-        $stats['dons'] = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stats['dons'] = $stmt->fetch();
         
         // Stock disponible
         $stmt = $this->db->query("
             SELECT SUM(COALESCE(md.entrer, 0) - COALESCE(md.sortie, 0)) as stock_total
             FROM mvt_dons md
         ");
-        $stock_result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stock_result = $stmt->fetch();
         $stats['stock'] = $stock_result['stock_total'] ?? 0;
         
         // Besoins satisfaits vs restants
@@ -292,11 +297,11 @@ class BNGRCModel {
                 SELECT 
                     bs.quantite - COALESCE(SUM(md.sortie), 0) as quantite_restante
                 FROM besoin_sinistre bs
-                LEFT JOIN mvt_dons md ON bs.id = md.id_besoin_sinistre
+                LEFT JOIN mvt_dons md ON bs.id = md.id_besoin_ville
                 GROUP BY bs.id, bs.quantite
             ) as besoins_status
         ");
-        $stats['satisfaction'] = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stats['satisfaction'] = $stmt->fetch();
         
         return $stats;
     }
@@ -312,10 +317,10 @@ class BNGRCModel {
             FROM region r
             LEFT JOIN ville v ON r.id = v.id_region
             LEFT JOIN besoin_sinistre bs ON v.id = bs.id_ville
-            LEFT JOIN mvt_dons md ON bs.id = md.id_besoin_sinistre
+            LEFT JOIN mvt_dons md ON bs.id = md.id_besoin_ville
             GROUP BY r.id, r.libelle
             ORDER BY r.libelle
         ");
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll();
     }
 }

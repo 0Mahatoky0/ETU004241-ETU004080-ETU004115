@@ -1,5 +1,10 @@
 <?php
 
+namespace app\controllers;
+
+use app\models\BNGRCModel;
+use Flight;
+
 class DispatchController {
     private $model;
     
@@ -12,10 +17,12 @@ class DispatchController {
     public function simulation() {
         $stock_disponible = $this->model->getStockDisponible();
         $besoins_non_satisfaits = $this->model->getBesoinsNonSatisfaits();
+        $tous_besoins = $this->model->getAllBesoinsSinistre();
         
         Flight::render('dispatch/simulation', [
             'stock_disponible' => $stock_disponible,
-            'besoins_non_satisfaits' => $besoins_non_satisfaits
+            'besoins_non_satisfaits' => $besoins_non_satisfaits,
+            'tous_besoins' => $tous_besoins
         ]);
     }
     
