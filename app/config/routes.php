@@ -6,6 +6,7 @@ use app\controllers\ObjetController;
 use app\controllers\ProfileController;
 use app\controllers\UserController;
 use app\controllers\EchangeControleur;
+use app\controllers\VilleController;
 use app\middlewares\SecurityHeadersMiddleware;
 use flight\Engine;
 use flight\net\Router;
@@ -18,16 +19,24 @@ use flight\net\Router;
  * @var Engine $app
  */
 
-$router->group('', function(Router $router) use ($app) {
+// Instancier le contrôleur des villes
+$villeController = new VilleController($app);
 
-	// Route pour le tableau de bord
-	$router->get('/dashboard', function() {
+$router->group('', function(Router $router) use ($app, $villeController) {
+
+	// Route pour le tableau de bord (page d'accueil)
+	$router->get('/', function() {
 		require __DIR__ . '/../views/dashboard.php';
 	});
 	
-	// Route par défaut
-	$router->get('/', function() {
-		echo '<h1>Bienvenue!</h1><p><a href="/dashboard">Accéder au tableau de bord</a></p>';
+	// Routes pour les villes
+	$router->get('/villes', [$villeController, 'index']);
+	$router->get('/villes/@id', [$villeController, 'show']);
+	$router->get('/api/villes', [$villeController, 'apiIndex']);
+	
+	// Route pour le tableau de bord original
+	$router->get('/dashboard', function() {
+		require __DIR__ . '/../views/dashboard.php';
 	});
 
 }, [ SecurityHeadersMiddleware::class ]);
