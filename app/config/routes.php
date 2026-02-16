@@ -1,14 +1,8 @@
 <?php
-
-use app\controllers\AuthController;
-use app\controllers\CategorieController;
-use app\controllers\ObjetController;
-use app\controllers\ProfileController;
-use app\controllers\UserController;
-use app\controllers\EchangeControleur;
 use app\middlewares\SecurityHeadersMiddleware;
 use flight\Engine;
 use flight\net\Router;
+use app\models\DonModel;
 
 /**
  * TAKALO TAKALO - ROUTES
@@ -20,7 +14,9 @@ use flight\net\Router;
 
 $router->group('', function(Router $router) use ($app) {
 
-	//$router->get('/', [$authController, 'showRegister']);
+	$router->get('/test', function () use ($app) {
+		$app->render('testModels');
+	});
 
 }, [ SecurityHeadersMiddleware::class ]);
 

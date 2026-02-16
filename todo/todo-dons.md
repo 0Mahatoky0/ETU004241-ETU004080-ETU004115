@@ -2,9 +2,9 @@
 ## insertion de dons
 ### base 
 - table
-    -  dons
+    -  [ok] dons
 - requete
-    - insrtion dons
+    - [ok] insrtion dons
 ### models
 - insertion dons
 - recuperation dons
