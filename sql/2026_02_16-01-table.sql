@@ -24,12 +24,14 @@ CREATE TABLE status_besoin_sinistre (
 	libelle VARCHAR(255)
 );
 
+
 CREATE TABLE besoin (
 	id INT,
 	id_categorie INT,
 	libelle VARCHAR(255),
 	prix_unitaire DECIMAL(10,2)
 );
+
 
 CREATE TABLE besoin_sinistre (
 	id INT,
@@ -41,6 +43,7 @@ CREATE TABLE besoin_sinistre (
 	id_status_besoin_ville INT
 );
 
+
 CREATE TABLE dons (
 	id INT,
 	id_besoin INT,
@@ -48,6 +51,7 @@ CREATE TABLE dons (
 	source VARCHAR(255),
 	date DATETIME
 );
+
 
 CREATE TABLE mvt_dons (
 	id INT,
@@ -57,3 +61,12 @@ CREATE TABLE mvt_dons (
 	id_besoin_ville INT,
 	date DATETIME
 );
+
+
+
+
+
+
+
+
+

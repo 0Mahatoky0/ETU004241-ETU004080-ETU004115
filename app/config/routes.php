@@ -20,7 +20,15 @@ use flight\net\Router;
 
 $router->group('', function(Router $router) use ($app) {
 
-	//$router->get('/', [$authController, 'showRegister']);
+	// Route pour le tableau de bord
+	$router->get('/dashboard', function() {
+		require __DIR__ . '/../views/dashboard.php';
+	});
+	
+	// Route par défaut
+	$router->get('/', function() {
+		echo '<h1>Bienvenue!</h1><p><a href="/dashboard">Accéder au tableau de bord</a></p>';
+	});
 
 }, [ SecurityHeadersMiddleware::class ]);
 
