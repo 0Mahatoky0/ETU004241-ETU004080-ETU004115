@@ -39,6 +39,7 @@ CREATE TABLE besoin_sinistre (
     id_besoin INT NOT NULL,
     quantite INT,
     id_status_besoin_sinistre INT NOT NULL,
+    date DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_ville) REFERENCES ville(id),
     FOREIGN KEY (id_besoin) REFERENCES besoin(id),
     FOREIGN KEY (id_status_besoin_sinistre) REFERENCES status_besoin_sinistre(id)
