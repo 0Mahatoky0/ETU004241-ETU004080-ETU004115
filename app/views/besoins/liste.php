@@ -57,7 +57,7 @@
                                     <td><?php echo htmlspecialchars($besoin['libelle'] ?? $besoin['besoin_libelle'] ?? ''); ?></td>
                                     <td class="text-end text-muted"><?php echo number_format($besoin['prix_unitaire'] ?? 0, 2); ?> MGA</td>
                                     <td class="text-center">
-                                        <a href="/dons/achat?id_besoin=<?php echo $besoin['id']; ?>" class="btn btn-sm btn-primary-custom">
+                                        <a href="/dons/achat/<?php echo $besoin['id']; ?>" class="btn btn-sm btn-primary-custom">
                                             <i class="fas fa-shopping-cart me-1"></i> Acheter
                                         </a>
                                     </td>

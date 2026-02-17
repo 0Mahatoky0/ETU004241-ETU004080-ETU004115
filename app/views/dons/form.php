@@ -19,8 +19,8 @@
                 <div class="card-header">
                     <h5 class="mb-0"><i class="fas fa-gift me-2"></i> Informations du Don</h5>
                 </div>
-                <div class="card-body">
-                    <form action="/dons/api/add" method="POST">
+                    <div class="card-body">
+                        <form action="/dons/store" method="POST">
                         <!-- Catégorie -->
                         <div class="mb-4">
                             <label for="id_categorie" class="form-label">
@@ -40,13 +40,13 @@
                             <label for="id_besoin" class="form-label">
                                 <i class="fas fa-list-alt me-2"></i> Besoin <span class="text-danger">*</span>
                             </label>
-                            <select name="id_besoin" id="id_besoin" class="form-select form-control-custom" required disabled>
+                            <select name="id_besoin" id="id_besoin" class="form-select form-control-custom" disabled>
                                 <option value="">-- Sélectionner d'abord une catégorie --</option>
                             </select>
                             <small class="form-text text-muted">Choisissez le besoin auquel ce don est destiné</small>
                         </div>
 
-                        <!-- Quantité -->
+                        <!-- Quantité / Montant -->
                         <div class="mb-4">
                             <label for="quantite" class="form-label">
                                 <i class="fas fa-box me-2"></i> Quantité <span class="text-danger">*</span>
@@ -59,6 +59,19 @@
                                    min="1"
                                    required>
                             <small class="form-text text-muted">Indiquez la quantité offerte</small>
+
+                            <div id="montant_wrap" style="display:none; margin-top:1rem;">
+                                <label for="montant" class="form-label">
+                                    <i class="fas fa-money-bill-wave me-2"></i> Montant (MGA) <span class="text-danger">*</span>
+                                </label>
+                                <input type="number"
+                                       name="montant"
+                                       id="montant"
+                                       step="0.01"
+                                       class="form-control form-control-custom"
+                                       placeholder="Ex: 150000">
+                                <small class="form-text text-muted">Montant en Ariary (pour les dons en argent)</small>
+                            </div>
                         </div>
 
                         <!-- Source -->
@@ -274,6 +287,9 @@
     document.addEventListener('DOMContentLoaded', function() {
         const categorieSelect = document.getElementById('id_categorie');
         const besoinSelect = document.getElementById('id_besoin');
+        const quantiteInput = document.getElementById('quantite');
+        const montantWrap = document.getElementById('montant_wrap');
+        const montantInput = document.getElementById('montant');
 
         if (!categorieSelect) return;
 
@@ -282,17 +298,42 @@
             besoinSelect.disabled = true;
             besoinSelect.innerHTML = '<option>Chargement...</option>';
 
+            const selectedText = this.options[this.selectedIndex] ? this.options[this.selectedIndex].text.toLowerCase() : '';
+            const isArgent = selectedText.includes('argent') || id === '3';
+
             if (!id) {
                 besoinSelect.innerHTML = '<option value="">-- Sélectionner d\'abord une catégorie --</option>';
                 besoinSelect.disabled = true;
+                // reset montant/quantite
+                montantWrap.style.display = 'none';
+                montantInput.required = false;
+                montantInput.value = '';
+                quantiteInput.disabled = false;
+                quantiteInput.required = true;
                 return;
             }
 
+            if (isArgent) {
+                // For money donations, no besoin selection required
+                besoinSelect.innerHTML = '<option value="">(Non requis pour les dons en argent)</option>';
+                besoinSelect.disabled = true;
+                besoinSelect.required = false;
+
+                // show montant, hide quantite
+                montantWrap.style.display = 'block';
+                montantInput.required = true;
+                quantiteInput.value = '';
+                quantiteInput.disabled = true;
+                quantiteInput.required = false;
+                return;
+            }
+
+            // Non-argent categories: load besoins
             fetch(`/api/besoins/categorie/${id}`)
                 .then(res => res.json())
                 .then(data => {
                     besoinSelect.innerHTML = '<option value="">-- Sélectionner un besoin --</option>';
-                    if (Array.isArray(data)) {
+                    if (Array.isArray(data) && data.length > 0) {
                         data.forEach(b => {
                             const opt = document.createElement('option');
                             opt.value = b.id;
@@ -300,18 +341,24 @@
                             besoinSelect.appendChild(opt);
                         });
                         besoinSelect.disabled = false;
-                    } else if (data.error) {
-                        besoinSelect.innerHTML = `<option value="">Erreur: ${data.error}</option>`;
-                        besoinSelect.disabled = true;
+                        besoinSelect.required = true;
                     } else {
                         besoinSelect.innerHTML = '<option value="">Aucun besoin trouvé</option>';
                         besoinSelect.disabled = true;
+                        besoinSelect.required = false;
                     }
+                    // reset montant/quantite visibility
+                    montantWrap.style.display = 'none';
+                    montantInput.required = false;
+                    montantInput.value = '';
+                    quantiteInput.disabled = false;
+                    quantiteInput.required = true;
                 })
                 .catch(err => {
                     console.error(err);
                     besoinSelect.innerHTML = '<option value="">Erreur de chargement</option>';
                     besoinSelect.disabled = true;
+                    besoinSelect.required = false;
                 });
         });
     });

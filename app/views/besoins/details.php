@@ -112,7 +112,7 @@
                                         </div>
                                         <div class="text-end ms-3">
                                             <div class="don-quantity">
-                                                <?php echo number_format($don['quantite']); ?>
+                                                <?php echo isset($don['quantite']) && $don['quantite'] !== null ? (int)$don['quantite'] : (isset($don['montant']) ? number_format($don['montant'], 2) . ' MGA' : '-'); ?>
                                             </div>
                                             <div class="don-date">
                                                 <?php echo date('d/m/Y', strtotime($don['date'])); ?>

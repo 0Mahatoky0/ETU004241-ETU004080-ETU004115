@@ -88,7 +88,7 @@
                                     </td>
                                     <td class="text-center">
                                         <span class="quantity-badge">
-                                            <?php echo number_format($don['quantite']); ?>
+                                            <?php echo isset($don['quantite']) && $don['quantite'] !== null ? (int)$don['quantite'] : (isset($don['montant']) ? number_format($don['montant'], 2) . ' MGA' : '-'); ?>
                                         </span>
                                     </td>
                                     <td class="text-end text-muted">
@@ -96,7 +96,15 @@
                                     </td>
                                     <td class="text-end">
                                         <strong class="text-primary">
-                                            <?php echo number_format($don['quantite'] * $don['prix_unitaire'], 2); ?> MGA
+                                            <?php
+                                                if (isset($don['quantite']) && $don['quantite'] !== null) {
+                                                    echo number_format($don['quantite'] * $don['prix_unitaire'], 2) . ' MGA';
+                                                } elseif (isset($don['montant']) && $don['montant'] !== null) {
+                                                    echo number_format($don['montant'], 2) . ' MGA';
+                                                } else {
+                                                    echo '-';
+                                                }
+                                            ?>
                                         </strong>
                                     </td>
                                     <td>
