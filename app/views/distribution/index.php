@@ -12,7 +12,7 @@ error_log("View - Distribution prioritaire: " . ($distribution_prioritaire_en_co
 error_log("View - Distribution type: " . $distribution_type);
 ?>
 
-<?php include __DIR__ . '/../../../public/includes/header.php'; ?>
+<?php include BASE_URL . __DIR__ . '/../../../public/includes/header.php'; ?>
 
 <!-- Top bar avec actions -->
 <div class="top-bar">
@@ -654,4 +654,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<?php include __DIR__ . '/../../../public/includes/footer.php'; ?>
+<?php include BASE_URL . __DIR__ . '/../../../public/includes/footer.php'; ?>

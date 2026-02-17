@@ -1,4 +1,4 @@
-<?php include('includes/header.php'); ?>
+<?php include(BASE_URL . '/includes/header.php'); ?>
 
 <div class="container-fluid px-4 py-4">
     <!-- En-tête -->
@@ -406,4 +406,4 @@ function showDonDetails(donId) {
 }
 </script>
 
-<?php include('includes/footer.php'); ?>
+<?php include(BASE_URL . '/includes/footer.php'); ?>

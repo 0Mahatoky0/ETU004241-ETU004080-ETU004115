@@ -1,4 +1,4 @@
-<?php include('includes/header.php'); ?>
+<?php include(BASE_URL . '/includes/header.php'); ?>
 
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -68,4 +68,4 @@
     </div>
 </div>
 
-<?php include('includes/footer.php'); ?>
+<?php include(BASE_URL . '/includes/footer.php'); ?>
