@@ -21,16 +21,27 @@
                 </div>
                 <div class="card-body">
                     <form action="/dons/api/add" method="POST">
+                        <!-- Catégorie -->
+                        <div class="mb-4">
+                            <label for="id_categorie" class="form-label">
+                                <i class="fas fa-tags me-2"></i> Catégorie <span class="text-danger">*</span>
+                            </label>
+                            <select name="id_categorie" id="id_categorie" class="form-select form-control-custom" required>
+                                <option value="">-- Sélectionner une catégorie --</option>
+                                <?php if (!empty($categories)) { foreach ($categories as $c) { ?>
+                                    <option value="<?= $c["id"] ?>"><?= htmlspecialchars($c["libelle"]) ?></option>
+                                <?php } } ?>
+                            </select>
+                            <small class="form-text text-muted">Choisissez la catégorie pour filtrer les besoins</small>
+                        </div>
+
                         <!-- Besoin -->
                         <div class="mb-4">
                             <label for="id_besoin" class="form-label">
                                 <i class="fas fa-list-alt me-2"></i> Besoin <span class="text-danger">*</span>
                             </label>
-                            <select name="id_besoin" id="id_besoin" class="form-select form-control-custom" required>
-                                <option value="">-- Sélectionner un besoin --</option>
-                                <?php foreach ($besoins as $b) { ?>
-                                    <option value="<?= $b["id"] ?>"><?= $b["libelle"] ?></option>
-                                <?php } ?>
+                            <select name="id_besoin" id="id_besoin" class="form-select form-control-custom" required disabled>
+                                <option value="">-- Sélectionner d'abord une catégorie --</option>
                             </select>
                             <small class="form-text text-muted">Choisissez le besoin auquel ce don est destiné</small>
                         </div>
@@ -257,6 +268,52 @@
         const now = new Date();
         now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
         dateInput.value = now.toISOString().slice(0, 16);
+    });
+
+    // Charger les besoins selon la catégorie sélectionnée
+    document.addEventListener('DOMContentLoaded', function() {
+        const categorieSelect = document.getElementById('id_categorie');
+        const besoinSelect = document.getElementById('id_besoin');
+
+        if (!categorieSelect) return;
+
+        categorieSelect.addEventListener('change', function() {
+            const id = this.value;
+            besoinSelect.disabled = true;
+            besoinSelect.innerHTML = '<option>Chargement...</option>';
+
+            if (!id) {
+                besoinSelect.innerHTML = '<option value="">-- Sélectionner d\'abord une catégorie --</option>';
+                besoinSelect.disabled = true;
+                return;
+            }
+
+            fetch(`/api/besoins/categorie/${id}`)
+                .then(res => res.json())
+                .then(data => {
+                    besoinSelect.innerHTML = '<option value="">-- Sélectionner un besoin --</option>';
+                    if (Array.isArray(data)) {
+                        data.forEach(b => {
+                            const opt = document.createElement('option');
+                            opt.value = b.id;
+                            opt.textContent = b.libelle;
+                            besoinSelect.appendChild(opt);
+                        });
+                        besoinSelect.disabled = false;
+                    } else if (data.error) {
+                        besoinSelect.innerHTML = `<option value="">Erreur: ${data.error}</option>`;
+                        besoinSelect.disabled = true;
+                    } else {
+                        besoinSelect.innerHTML = '<option value="">Aucun besoin trouvé</option>';
+                        besoinSelect.disabled = true;
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    besoinSelect.innerHTML = '<option value="">Erreur de chargement</option>';
+                    besoinSelect.disabled = true;
+                });
+        });
     });
 </script>
 

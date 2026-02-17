@@ -125,7 +125,6 @@
                         <tr>
                             <th>Ville</th>
                             <th>Nombre Besoins</th>
-                            <th>Nombre Dons</th>
                             <th>Quantité Totale</th>
                             <th>Quantité Assignée</th>
                             <th>Quantité Restante</th>
@@ -140,7 +139,6 @@
                                     </a>
                                 </td>
                                 <td><?php echo $ville['nombre_besoins']; ?></td>
-                                <td><?php echo $ville['nombre_dons'] ?? 0; ?></td>
                                 <td><?php echo number_format($ville['quantite_totale_besoins']); ?></td>
                                 <td><?php echo number_format($ville['quantite_allouee']); ?></td>
                                 <td>

@@ -281,7 +281,7 @@
                             <i class="fas fa-plus-circle"></i>
                             <span>Saisir un don</span>
                         </a>
-                        <a href="#" class="dropdown-item-sidebar" data-page="dons-achat">
+                        <a href="/besoins/liste" class="dropdown-item-sidebar" data-page="dons-achat">
                             <i class="fas fa-shopping-cart"></i>
                             <span>Acheter avec dons</span>
                         </a>

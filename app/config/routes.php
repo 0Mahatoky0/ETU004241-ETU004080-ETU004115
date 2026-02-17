@@ -128,7 +128,7 @@ $router->get('/api/villes/region/@id_region', function($id_region) {
 
 $router->get('/api/besoins/categorie/@id_categorie', function($id_categorie) {
     $controller = new app\controllers\BesoinController();
-    $controller->getBesoinsByCategorie();
+    $controller->getBesoinsByCategorie($id_categorie);
 });
 
 $router->get('/api/stock/disponible', function() {
