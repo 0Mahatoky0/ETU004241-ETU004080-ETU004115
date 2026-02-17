@@ -18,7 +18,7 @@ class BesoinController {
     public function saisieBesoin() {
         // $regions = $this->model->getAllRegions();
         $villes = $this->model->getAllVilles();
-        $categories = $this->model->getAllCategoriesBesoin();
+        $categories = $this->model->getAllBesoins();
         $status = $this->model->getStatusBesoinSinistre();
         
         Flight::render('besoin_sinistre/form', [

@@ -38,10 +38,10 @@
                         <!-- Besoin -->
                         <div class="mb-4">
                             <label for="id_besoin" class="form-label">
-                                <i class="fas fa-list-alt me-2"></i> Type de Besoin <span class="text-danger">*</span>
+                                <i class="fas fa-list-alt me-2"></i> Besoin <span class="text-danger">*</span>
                             </label>
                             <select name="id_besoin" id="id_besoin" class="form-select form-control-custom" required>
-                                <option value="">-- Sélectionner un type de besoin --</option>
+                                <option value="">-- Sélectionner le besoin --</option>
                                 <?php foreach ($besoins as $besoin) { ?>
                                     <option value="<?= $besoin["id"] ?>"><?= $besoin["libelle"] ?></option>
                                 <?php } ?>
