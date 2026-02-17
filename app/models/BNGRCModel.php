@@ -110,12 +110,32 @@ class BNGRCModel {
     
     // ===== GESTION DES DONS =====
     
-    public function createDon($id_besoin, $quantite, $source) {
-        $stmt = $this->db->prepare("
-            INSERT INTO dons (id_besoin, quantite, source, date) 
-            VALUES (?, ?, ?, NOW())
-        ");
-        $stmt->execute([$id_besoin, $quantite, $source]);
+    public function createDon($id_besoin, $quantite = null, $source = null, $montant = null) {
+        $stmt = $this->db->prepare(
+            "INSERT INTO dons (id_besoin, quantite, source, date, montant) VALUES (?, ?, ?, NOW(), ?)"
+        );
+        $stmt->execute([$id_besoin, $quantite, $source, $montant]);
+        return $this->db->lastInsertId();
+    }
+
+    public function getBesoinById($id_besoin) {
+        $stmt = $this->db->prepare("SELECT * FROM besoin WHERE id = ?");
+        $stmt->execute([$id_besoin]);
+        return $stmt->fetch();
+    }
+
+    public function getOrCreateDonArgentBesoin($id_categorie = 3) {
+        // Cherche un besoin spécifique 'Don en argent' pour cette catégorie
+        $stmt = $this->db->prepare("SELECT * FROM besoin WHERE id_categorie = ? AND libelle = 'Don en argent' LIMIT 1");
+        $stmt->execute([$id_categorie]);
+        $row = $stmt->fetch();
+        if ($row) {
+            return $row['id'];
+        }
+
+        // Créer un besoin placeholder pour les dons en argent
+        $insert = $this->db->prepare("INSERT INTO besoin (id_categorie, libelle, prix_unitaire) VALUES (?, 'Don en argent', 0)");
+        $insert->execute([$id_categorie]);
         return $this->db->lastInsertId();
     }
     
@@ -128,6 +148,29 @@ class BNGRCModel {
             ORDER BY d.date DESC
         ");
         return $stmt->fetchAll();
+    }
+
+    /**
+     * Retourne la somme des montants disponibles pour une catégorie de besoin.
+     * Si la colonne `montant` existe dans `dons`, on somme cette colonne.
+     * Sinon on retombe sur la colonne `quantite` (compatibilité avec schéma existant).
+     */
+    public function getTotalMontantByCategorie($id_categorie = 3) {
+        // Vérifier si la colonne `montant` existe
+        $stmt = $this->db->query("SHOW COLUMNS FROM dons LIKE 'montant'");
+        $hasMontant = $stmt->rowCount() > 0;
+
+        if ($hasMontant) {
+            $sql = "SELECT COALESCE(SUM(d.montant), 0) as total FROM dons d JOIN besoin b ON d.id_besoin = b.id WHERE b.id_categorie = ?";
+        } else {
+            // fallback: sommer la colonne quantite
+            $sql = "SELECT COALESCE(SUM(d.quantite), 0) as total FROM dons d JOIN besoin b ON d.id_besoin = b.id WHERE b.id_categorie = ?";
+        }
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$id_categorie]);
+        $row = $stmt->fetch();
+        return $row ? $row['total'] : 0;
     }
 
     public function getBesoinsRestantsPourAchat($id_ville = null) {
