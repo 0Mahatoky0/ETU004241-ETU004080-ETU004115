@@ -2,23 +2,23 @@
 
 namespace app\controllers;
 
-use app\models\BNGRCModel;
+use app\services\DashboardService;
 use Flight;
 
 class DashboardController {
-    private $model;
+    private $service;
     
     public function __construct() {
-        $this->model = new BNGRCModel();
+        $this->service = new DashboardService();
     }
     
     // ===== TABLEAU DE BORD GLOBAL =====
     
     public function index() {
-        $stats = $this->model->getDashboardStats();
-        $stats_by_ville = $this->model->getDashboardByVille();
-        $stock_disponible = $this->model->getStockDisponible();
-        $besoins_non_satisfaits = $this->model->getBesoinsNonSatisfaits();
+        $stats = $this->service->getDashboardStats();
+        $stats_by_ville = $this->service->getDashboardByVille();
+        $stock_disponible = $this->service->getStockDisponible();
+        $besoins_non_satisfaits = $this->service->getBesoinsNonSatisfaits();
         
         Flight::render('dashboard/index', [
             'stats' => $stats,
@@ -31,8 +31,8 @@ class DashboardController {
     // ===== API POUR LES GRAPHIQUES =====
     
     public function getChartData() {
-        $stats = $this->model->getDashboardStats();
-        $stats_by_region = $this->model->getDashboardByVille();
+        $stats = $this->service->getDashboardStats();
+        $stats_by_region = $this->service->getDashboardByVille();
         
         Flight::json([
             'stats' => $stats,
@@ -41,12 +41,12 @@ class DashboardController {
     }
     
     public function getStockChart() {
-        $stock = $this->model->getStockDisponible();
+        $stock = $this->service->getStockDisponible();
         Flight::json($stock);
     }
     
     public function getBesoinChart() {
-        $besoins = $this->model->getBesoinsNonSatisfaits();
+        $besoins = $this->service->getBesoinsNonSatisfaits();
         Flight::json($besoins);
     }
 }

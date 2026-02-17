@@ -21,7 +21,7 @@ class BesoinController {
         $categories = $this->model->getAllCategoriesBesoin();
         $status = $this->model->getStatusBesoinSinistre();
         
-        Flight::render('besoin_sinistre/form', [
+        Flight::render('besoins/form', [
             'villes' => $villes,
             'besoins' => $categories,
             'status' => $status

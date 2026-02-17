@@ -26,7 +26,7 @@ class BesoinSinistreControleur
         $besoins = $besoinModel->getAll();
 
         // Rediriger vers le formulaire avec les données nécessaires
-        Flight::render("besoin_sinistre/form", [
+        Flight::render("besoins/form", [
             "villes" => $villes,
             "besoins" => $besoins
         ]);
@@ -46,9 +46,9 @@ class BesoinSinistreControleur
         $result = $besoinSinistreModel->addBesoinSinistre($id_ville, $id_besoin, $quantite);
 
         if ($result) {
-            Flight::json(["success" => true, "message" => "Besoin sinistre ajouté avec succès"]);
+            Flight::redirect('/dashboard');
         } else {
-            Flight::json(["success" => false, "message" => "Échec de l'ajout du besoin sinistre"], 500);
+            Flight::redirect('/besoin_sinistre/add');
         }
     }
 }

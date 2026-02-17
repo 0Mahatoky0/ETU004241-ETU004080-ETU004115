@@ -26,50 +26,74 @@ class DonControleur {
         Flight::render("dons/form", ["besoins" => $besoins]);
     }
 
+    // Insère un don sans automatisation des mouvements (pas de mvt_dons ni update status)
     public function insertDon() {
         $data = Flight::request()->data;
 
-        $id_besoin = $data->id_besoin;
-        $quantite = $data->quantite;
-        $source = $data->source;
-        $date = $data->date;
+        $id_besoin = $data->id_besoin ?? null;
+        $quantite = $data->quantite ?? null;
+        $source = $data->source ?? '';
+        $date = $data->date ?? date('Y-m-d H:i:s');
 
-        $donModel = new DonModel(Flight::db());
+        if (empty($id_besoin) || empty($quantite)) {
+            Flight::json(["success" => false, "message" => "id_besoin et quantite requis"], 400);
+            return;
+        }
+
+        $donModel = new DonModel();
         $result = $donModel->insertDon($id_besoin, $quantite, $source, $date);
 
-        // Automatiser l'insertion dans mvt_dons
         if ($result) {
-            $besoin_sinistre = new BesoinSinistreModel(Flight::db());
-            $mvtDonsModel = new MvtDonsModel(Flight::db());
-            $statusSinitreModel = new StatusBesoinSinistreModel(Flight::db());
-            $besoin_sinistre_ancien = $besoin_sinistre->getLePlusAncienBesoinSinistre()['id'] ?? null;
-            if (!$besoin_sinistre_ancien) {
-                Flight::json(["success" => false, "message" => "Aucun besoin sinistre disponible"], 404);
-                return;
-            }
-
-            $idStat = $statusSinitreModel->getIdByCode("ACP")["id"] ?? null;
-            // Vérifier le statut actuel pour éviter d'ajouter un mouvement si déjà en ACP
-            $current = $besoin_sinistre->getBesoinSinistreById($besoin_sinistre_ancien);
-            $currentStatus = $current['id_status_besoin_sinistre'] ?? null;
-            if ($currentStatus == $idStat) {
-                Flight::json(["success" => false, "message" => "Le besoin sinistre est déjà en statut ACP"], 200);
-                return;
-            }
-
-            $mvtResult = $mvtDonsModel->create($result, null, $quantite, $besoin_sinistre_ancien, date('Y-m-d H:i:s'));
-
-            if ($mvtResult) {
-                $besoin_sinistre->updateStatus($besoin_sinistre_ancien, $idStat); // Mettre à jour le statut du besoin sinistre à "Distribué"
-                Flight::json(["success" => true, "message" => "Mouvement de don ajouté avec succès"]);
-            } else {
-                Flight::json(["success" => false, "message" => "Échec de l'ajout du mouvement de don"], 500);
-            }
-
+            Flight::redirect('/dashboard');
         } else {
-            Flight::json(["success" => false, "message" => "Échec de l'ajout du don"], 500);
+            Flight::redirect('/dons/add');
         }
     }
+
+    // public function insertDon() {
+    //     $data = Flight::request()->data;
+
+    //     $id_besoin = $data->id_besoin;
+    //     $quantite = $data->quantite;
+    //     $source = $data->source;
+    //     $date = $data->date;
+
+    //     $donModel = new DonModel(Flight::db());
+    //     $result = $donModel->insertDon($id_besoin, $quantite, $source, $date);
+
+    //     // Automatiser l'insertion dans mvt_dons
+    //     if ($result) {
+    //         $besoin_sinistre = new BesoinSinistreModel(Flight::db());
+    //         $mvtDonsModel = new MvtDonsModel(Flight::db());
+    //         $statusSinitreModel = new StatusBesoinSinistreModel(Flight::db());
+    //         $besoin_sinistre_ancien = $besoin_sinistre->getLePlusAncienBesoinSinistre()['id'] ?? null;
+    //         if (!$besoin_sinistre_ancien) {
+    //             Flight::json(["success" => false, "message" => "Aucun besoin sinistre disponible"], 404);
+    //             return;
+    //         }
+
+    //         $idStat = $statusSinitreModel->getIdByCode("ACP")["id"] ?? null;
+    //         // Vérifier le statut actuel pour éviter d'ajouter un mouvement si déjà en ACP
+    //         $current = $besoin_sinistre->getBesoinSinistreById($besoin_sinistre_ancien);
+    //         $currentStatus = $current['id_status_besoin_sinistre'] ?? null;
+    //         if ($currentStatus == $idStat) {
+    //             Flight::json(["success" => false, "message" => "Le besoin sinistre est déjà en statut ACP"], 200);
+    //             return;
+    //         }
+
+    //         $mvtResult = $mvtDonsModel->create($result, null, $quantite, $besoin_sinistre_ancien, date('Y-m-d H:i:s'));
+
+    //         if ($mvtResult) {
+    //             $besoin_sinistre->updateStatus($besoin_sinistre_ancien, $idStat); // Mettre à jour le statut du besoin sinistre à "Distribué"
+    //             Flight::json(["success" => true, "message" => "Mouvement de don ajouté avec succès"]);
+    //         } else {
+    //             Flight::json(["success" => false, "message" => "Échec de l'ajout du mouvement de don"], 500);
+    //         }
+
+    //     } else {
+    //         Flight::json(["success" => false, "message" => "Échec de l'ajout du don"], 500);
+    //     }
+    // }
  
 }
 ?>
