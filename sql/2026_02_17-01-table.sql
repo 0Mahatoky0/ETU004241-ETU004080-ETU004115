@@ -72,3 +72,12 @@ CREATE TABLE mvt_dons (
     FOREIGN KEY (id_dons) REFERENCES dons(id),
     FOREIGN KEY (id_besoin_sinistre) REFERENCES besoin_sinistre(id)
 );
+
+CREATE TABLE achat_dons (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_dons INT NOT NULL,
+    quantite INT,
+    montant DECIMAL(10,2),
+    date DATETIME,
+    FOREIGN KEY (id_dons) REFERENCES dons(id)
+);
