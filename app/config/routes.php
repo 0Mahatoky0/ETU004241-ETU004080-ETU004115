@@ -169,8 +169,19 @@ $router->get('/distribution/valider-proportionnelle', function() {
     $controller->validerDistributionProportionnelle();
 });
 
+// Routes distribution prioritaire
+$router->get('/distribution/simuler-prioritaire', function() {
+    $controller = new app\controllers\DistributionController();
+    $controller->simulerDistributionPrioritaire();
+});
+
+$router->get('/distribution/valider-prioritaire', function() {
+    $controller = new app\controllers\DistributionController();
+    $controller->validerDistributionPrioritaire();
+});
+
 $router->get('/api/distribution/simulation-proportionnelle', function() {
-    require __DIR__ . '/../api_simple.php?action=simuler-proportionnelle';
+    require __DIR__ . '/../api_simple.php';
 });
 
 $router->get('/api/distribution/valider-proportionnelle', function() {

@@ -18,6 +18,14 @@ class DistributionController {
     public function index() {
         // Vérifier s'il y a une simulation en cours
         $distribution_en_cours = isset($_SESSION['distribution']) ? $_SESSION['distribution'] : null;
+        $distribution_proportionnelle_en_cours = isset($_SESSION['distribution_proportionnelle']) ? $_SESSION['distribution_proportionnelle'] : null;
+        $distribution_prioritaire_en_cours = isset($_SESSION['distribution_prioritaire']) ? $_SESSION['distribution_prioritaire'] : null;
+        
+        // Debug temporaire
+        error_log("Controller - Distribution en cours: " . ($distribution_en_cours ? "YES" : "NO"));
+        error_log("Controller - Distribution proportionnelle: " . ($distribution_proportionnelle_en_cours ? "YES" : "NO"));
+        error_log("Controller - Distribution prioritaire: " . ($distribution_prioritaire_en_cours ? "YES" : "NO"));
+        error_log("Controller - Prioritaire count: " . ($distribution_prioritaire_en_cours ? count($distribution_prioritaire_en_cours['distribution']) : 'NULL'));
         
         $besoins = $this->model->getBesoinsForDistribution();
         $stock = $this->model->getStockBngrc();
@@ -27,7 +35,9 @@ class DistributionController {
             'besoins' => $besoins,
             'stock' => $stock,
             'statistiques' => $statistiques,
-            'distribution_en_cours' => $distribution_en_cours
+            'distribution_en_cours' => $distribution_en_cours,
+            'distribution_proportionnelle_en_cours' => $distribution_proportionnelle_en_cours,
+            'distribution_prioritaire_en_cours' => $distribution_prioritaire_en_cours
         ]);
     }
     
@@ -189,6 +199,47 @@ class DistributionController {
                 'error' => $e->getMessage()
             ]);
             exit;
+        }
+    }
+    
+    // ===== MÉTHODES DE DISTRIBUTION PRIORITAIRE =====
+    
+    public function simulerDistributionPrioritaire() {
+        try {
+            $distribution = $this->model->simulerDistributionPrioritaire();
+            
+            // Stocker la simulation en session
+            $_SESSION['distribution_prioritaire'] = $distribution;
+            $_SESSION['distribution_type'] = 'prioritaire';
+            
+            Flight::redirect('/distribution?simulation_prioritaire=1');
+            
+        } catch (Exception $e) {
+            Flight::redirect('/distribution?error=' . urlencode($e->getMessage()));
+        }
+    }
+    
+    public function validerDistributionPrioritaire() {
+        try {
+            // Vérifier qu'il y a une simulation en cours
+            if (!isset($_SESSION['distribution_prioritaire'])) {
+                throw new Exception("Aucune simulation prioritaire en cours à valider");
+            }
+            
+            $distribution = $_SESSION['distribution_prioritaire'];
+            $success = $this->model->validerDistributionPrioritaire($distribution);
+            
+            if ($success) {
+                // Supprimer la simulation de la session
+                unset($_SESSION['distribution_prioritaire']);
+                unset($_SESSION['distribution_type']);
+                Flight::redirect('/distribution?valide_prioritaire=1');
+            } else {
+                throw new Exception("Erreur lors de la validation de la distribution prioritaire");
+            }
+            
+        } catch (Exception $e) {
+            Flight::redirect('/distribution?error=' . urlencode($e->getMessage()));
         }
     }
 }
