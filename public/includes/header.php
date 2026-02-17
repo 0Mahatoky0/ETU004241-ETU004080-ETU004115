@@ -291,6 +291,28 @@
                         </a>
                     </div>
                 </li>
+
+                <!-- Distribution avec dropdown -->
+                <li class="nav-item sidebar-dropdown">
+                    <a class="sidebar-link dropdown-toggle-sidebar" onclick="toggleDropdown('distributionDropdown')">
+                        <div style="display: flex; align-items: center;">
+                            <i class="fas fa-share-alt"></i>
+                            <span>Distribution</span>
+                        </div>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </a>
+                    <div class="dropdown-menu-sidebar" id="distributionDropdown">
+                        <a href="/distribution/simuler" class="dropdown-item-sidebar" data-page="distribution-saisie">
+                            <i class="fas fa-share-alt"></i>
+                            <span>Simulation</span>
+                        </a>
+                        <a href="/distribution/reinitialiser" class="dropdown-item-sidebar" data-page="distribution-liste">
+                            <i class="fas fa-sync-alt"></i>
+                            <span>Reinitialiser</span>
+                        </a>
+                    </div>
+                </li>
+
             </ul>
         </nav>
     </aside>

@@ -5,7 +5,7 @@
     <footer class="bg-light text-center py-3 mt-5">
         <div class="container">
             <p class="text-muted mb-0">
-                &copy; 2026 BNGRC - Bureau National de Gestion des Risques et Catastrophes
+                &copy; 2026 BNGRC - ETU4080 - ETU04115 - ETU04241. Tous droits réservés.
             </p>
         </div>
     </footer>
