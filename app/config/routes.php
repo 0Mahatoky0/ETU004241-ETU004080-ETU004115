@@ -158,6 +158,25 @@ $router->get('/api/distribution/statistiques', function() {
     $controller->apiStatistiques();
 });
 
+// Routes distribution proportionnelle
+$router->get('/distribution/simuler-proportionnelle', function() {
+    $controller = new app\controllers\DistributionController();
+    $controller->simulerDistributionProportionnelle();
+});
+
+$router->get('/distribution/valider-proportionnelle', function() {
+    $controller = new app\controllers\DistributionController();
+    $controller->validerDistributionProportionnelle();
+});
+
+$router->get('/api/distribution/simulation-proportionnelle', function() {
+    require __DIR__ . '/../api_simple.php?action=simuler-proportionnelle';
+});
+
+$router->get('/api/distribution/valider-proportionnelle', function() {
+    require __DIR__ . '/../api_distribution.php?action=valider-proportionnelle';
+});
+
 // ===== API ROUTES =====
 $router->get('/api/villes/region/@id_region', function($id_region) {
     $controller = new app\controllers\BesoinController();

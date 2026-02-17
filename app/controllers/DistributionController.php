@@ -6,6 +6,8 @@ use Exception;
 use app\models\BNGRCModel;
 use Flight;
 
+// Pas de session_start() ici, c'est déjà fait dans public/index.php
+
 class DistributionController {
     private $model;
     
@@ -123,6 +125,70 @@ class DistributionController {
                 'success' => false,
                 'error' => $e->getMessage()
             ], 500);
+        }
+    }
+    
+    // ===== MÉTHODES DE DISTRIBUTION PROPORTIONNELLE =====
+    
+    public function simulerDistributionProportionnelle() {
+        try {
+            $distribution = $this->model->simulerDistributionProportionnelle();
+            
+            // Stocker la simulation en session avec un identifiant unique
+            $_SESSION['distribution_proportionnelle'] = $distribution;
+            $_SESSION['distribution_type'] = 'proportionnelle';
+            
+            Flight::redirect('/distribution?simulation_proportionnelle=1');
+            
+        } catch (Exception $e) {
+            Flight::redirect('/distribution?error=' . urlencode($e->getMessage()));
+        }
+    }
+    
+    public function validerDistributionProportionnelle() {
+        try {
+            // Vérifier qu'il y a une simulation en cours
+            if (!isset($_SESSION['distribution_proportionnelle'])) {
+                throw new Exception("Aucune simulation proportionnelle en cours à valider");
+            }
+            
+            $distribution = $_SESSION['distribution_proportionnelle'];
+            $success = $this->model->validerDistributionProportionnelle($distribution);
+            
+            if ($success) {
+                // Supprimer la simulation de la session
+                unset($_SESSION['distribution_proportionnelle']);
+                unset($_SESSION['distribution_type']);
+                Flight::redirect('/distribution?valide_proportionnelle=1');
+            } else {
+                throw new Exception("Erreur lors de la validation de la distribution proportionnelle");
+            }
+            
+        } catch (Exception $e) {
+            Flight::redirect('/distribution?error=' . urlencode($e->getMessage()));
+        }
+    }
+    
+    public function apiSimulationProportionnelle() {
+        try {
+            // Désactiver l'affichage de Tracy pour les appels API
+            header('Content-Type: application/json');
+            
+            $distribution = $this->model->simulerDistributionProportionnelle();
+            echo json_encode([
+                'success' => true,
+                'distribution' => $distribution,
+                'total_alloue' => array_sum(array_column($distribution['distribution'], 'quantite_allouee'))
+            ]);
+            exit;
+            
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'error' => $e->getMessage()
+            ]);
+            exit;
         }
     }
 }
