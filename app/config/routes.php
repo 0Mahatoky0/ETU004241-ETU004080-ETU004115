@@ -13,6 +13,7 @@ use app\controllers\DashboardController;
 use app\controllers\BesoinController;
 use app\controllers\DonController;
 use app\controllers\DispatchController;
+use app\controllers\DistributionController;
 use app\middlewares\SecurityHeadersMiddleware;
 use flight\Engine;
 use flight\net\Router;
@@ -118,6 +119,43 @@ $router->get('/dispatch/etat', function() {
 $router->get('/dispatch/details/@id_besoin_sinistre', function($id_besoin_sinistre) {
     $controller = new app\controllers\DispatchController();
     $controller->detailsBesoin($id_besoin_sinistre);
+});
+
+// ===== ROUTES DISTRIBUTION =====
+$router->get('/distribution', function() {
+    $controller = new app\controllers\DistributionController();
+    $controller->index();
+});
+
+$router->get('/distribution/simuler', function() {
+    $controller = new app\controllers\DistributionController();
+    $controller->simulerDistribution();
+});
+
+$router->get('/distribution/valider', function() {
+    $controller = new app\controllers\DistributionController();
+    $controller->validerDistribution();
+});
+
+$router->get('/distribution/reinitialiser', function() {
+    $controller = new app\controllers\DistributionController();
+    $controller->reinitialiserDistribution();
+});
+
+$router->get('/distribution/recap', function() {
+    $controller = new app\controllers\DistributionController();
+    $controller->recapitulatif();
+});
+
+// API Distribution
+$router->get('/api/distribution/simulation', function() {
+    $controller = new app\controllers\DistributionController();
+    $controller->apiSimulation();
+});
+
+$router->get('/api/distribution/statistiques', function() {
+    $controller = new app\controllers\DistributionController();
+    $controller->apiStatistiques();
 });
 
 // ===== API ROUTES =====

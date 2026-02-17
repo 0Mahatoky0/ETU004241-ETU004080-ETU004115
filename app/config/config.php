@@ -50,8 +50,8 @@ return [
 		// MySQL Example:
 		'host'     => '127.0.0.1',      // Database host (e.g., 'localhost', 'db.example.com')
 		'dbname'   => 'bngrc',   // Database name (e.g., 'flightphp')
-		'user'     => 'root',  // Database user (e.g., 'root')
-		'password' => '',  // Database password (never commit real passwords)
+		'user'     => 'sharon',  // Database user (e.g., 'root')
+		'password' => 'sharon',  // Database password (never commit real passwords)
 	],
 
 	// Google OAuth Credentials
