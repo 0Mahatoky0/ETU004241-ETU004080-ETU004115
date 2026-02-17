@@ -1,203 +1,288 @@
-<?php include('includes/header.php'); ?>
+<?php include('includes/header.php') ?>
 
 <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-truck"></i> Simulation de Dispatch</h2>
-        <a href="/dispatch/etat" class="btn btn-info">
-            <i class="fas fa-chart-line"></i> Voir l'état des besoins
-        </a>
-    </div>
-    
-    <?php if (isset($_GET['success'])): ?>
-        <div class="alert alert-success alert-dismissible fade show">
-            <i class="fas fa-check-circle"></i> Dispatch effectué avec succès!
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    <?php endif; ?>
-    
-    <?php if (isset($_GET['error'])): ?>
-        <div class="alert alert-danger alert-dismissible fade show">
-            <?php echo htmlspecialchars($_GET['error']); ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    <?php endif; ?>
-    
     <div class="row">
-        <!-- Stock disponible -->
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-success text-white">
-                    <h5><i class="fas fa-warehouse"></i> Stock Disponible</h5>
-                </div>
-                <div class="card-body">
-                    <?php if (empty($stock_disponible)): ?>
-                        <div class="text-center py-3">
-                            <i class="fas fa-box-open fa-2x text-muted mb-2"></i>
-                            <p class="text-muted">Aucun stock disponible</p>
-                        </div>
-                    <?php else: ?>
-                        <div class="table-responsive">
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Bien</th>
-                                        <th>Quantité</th>
-                                        <th>Valeur</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($stock_disponible as $stock): ?>
-                                        <tr>
-                                            <td>
-                                                <small><?php echo htmlspecialchars($stock['besoin_libelle']); ?></small>
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-success">
-                                                    <?php echo number_format($stock['stock_disponible']); ?>
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <small><?php echo number_format($stock['stock_disponible'] * $stock['prix_unitaire'], 0); ?> MGA</small>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    <?php endif; ?>
-                </div>
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="bi bi-calculator"></i> Simulation d'Achat</h2>
+                <a href="/achats/besoins-restants" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Retour à la liste
+                </a>
             </div>
-        </div>
-        
-        <!-- Besoins non satisfaits -->
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-warning text-dark">
-                    <h5><i class="fas fa-exclamation-triangle"></i> Besoins Non Satisfaits</h5>
+
+            <!-- Messages -->
+            <?php if (isset($_GET['error'])): ?>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle"></i> <?= htmlspecialchars($_GET['error']) ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
-                <div class="card-body">
-                    <?php if (empty($besoins_non_satisfaits)): ?>
-                        <div class="text-center py-3">
-                            <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
-                            <p class="text-muted">Tous les besoins sont satisfaits!</p>
-                        </div>
-                    <?php else: ?>
-                        <div class="table-responsive">
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Ville</th>
-                                        <th>Besoin</th>
-                                        <th>Restant</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($besoins_non_satisfaits as $besoin): ?>
-                                        <tr>
-                                            <td>
-                                                <small><?php echo htmlspecialchars($besoin['ville_libelle']); ?></small>
-                                            </td>
-                                            <td>
-                                                <small><?php echo htmlspecialchars($besoin['besoin_libelle']); ?></small>
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-warning">
-                                                    <?php echo number_format($besoin['quantite_restante']); ?>
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <a href="/dispatch/simuler/<?php echo $besoin['id']; ?>" 
-                                                   class="btn btn-sm btn-outline-primary" title="Simuler dispatch">
-                                                    <i class="fas fa-truck"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Statistiques -->
-    <div class="row mt-4">
-        <div class="col-md-3">
-            <div class="card bg-success text-white">
-                <div class="card-body text-center">
-                    <i class="fas fa-warehouse fa-2x mb-2"></i>
-                    <h5>Stock Total</h5>
-                    <h3><?php echo array_sum(array_column($stock_disponible, 'stock_disponible')); ?></h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-warning text-dark">
-                <div class="card-body text-center">
-                    <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
-                    <h5>Besoins en Attente</h5>
-                    <h3><?php echo count($besoins_non_satisfaits); ?></h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-info text-white">
-                <div class="card-body text-center">
-                    <i class="fas fa-boxes fa-2x mb-2"></i>
-                    <h5>Quantité Requise</h5>
-                    <h3><?php echo number_format(array_sum(array_column($besoins_non_satisfaits, 'quantite_restante'))); ?></h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-primary text-white">
-                <div class="card-body text-center">
-                    <i class="fas fa-percentage fa-2x mb-2"></i>
-                    <h5>Taux de Satisfaction</h5>
-                    <h3>
-                        <?php 
-                        $total_besoins = count($besoins_non_satisfaits) + count(array_filter($tous_besoins, function($b) use ($besoins_non_satisfaits) {
-                            foreach ($besoins_non_satisfaits as $ns) {
-                                if ($ns['id'] == $b['id']) return false;
-                            }
-                            return true;
-                        }));
-                        $taux = $total_besoins > 0 ? (($total_besoins - count($besoins_non_satisfaits)) / $total_besoins) * 100 : 100;
-                        echo number_format($taux, 1); ?>%
-                    </h3>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Actions rapides -->
-    <div class="card mt-4">
-        <div class="card-header">
-            <h5><i class="fas fa-bolt"></i> Actions Rapides</h5>
-        </div>
-        <div class="card-body">
+            <?php endif; ?>
+
             <div class="row">
-                <div class="col-md-4">
-                    <a href="/besoins/saisie" class="btn btn-outline-primary w-100">
-                        <i class="fas fa-plus"></i> Nouveau Besoin
-                    </a>
+                <!-- Informations du besoin -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-info-circle"></i> Informations du Besoin</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Région:</strong></td>
+                                    <td><?= htmlspecialchars($besoin['region_libelle']) ?></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Ville:</strong></td>
+                                    <td><?= htmlspecialchars($besoin['ville_libelle']) ?></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Catégorie:</strong></td>
+                                    <td><span class="badge bg-info"><?= htmlspecialchars($besoin['categorie_libelle']) ?></span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Besoin:</strong></td>
+                                    <td><?= htmlspecialchars($besoin['besoin_libelle']) ?></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Quantité restante:</strong></td>
+                                    <td><span class="badge bg-success"><?= number_format($besoin['quantite_restante']) ?></span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Prix unitaire:</strong></td>
+                                    <td><?= number_format($besoin['prix_unitaire'], 2, ',', ' ') ?> Ar</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-4">
-                    <a href="/dons/saisie" class="btn btn-outline-success w-100">
-                        <i class="fas fa-hand-holding-heart"></i> Nouveau Don
-                    </a>
+
+                <!-- Formulaire de simulation -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-calculator"></i> Simulation</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="simulationForm">
+                                <input type="hidden" name="id_besoin_sinistre" value="<?= $besoin['besoin_sinistre_id'] ?>">
+                                <input type="hidden" name="id_besoin" value="<?= $besoin['id_besoin'] ?>">
+                                <input type="hidden" name="id_ville" value="<?= $besoin['id_ville'] ?>">
+                                
+                                <div class="mb-3">
+                                    <label for="quantite" class="form-label">Quantité à acheter</label>
+                                    <input type="number" class="form-control" id="quantite" name="quantite" 
+                                           min="1" max="<?= $besoin['quantite_restante'] ?>" required>
+                                    <div class="form-text">Maximum: <?= number_format($besoin['quantite_restante']) ?></div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="prix_unitaire" class="form-label">Prix unitaire (Ar)</label>
+                                    <input type="number" class="form-control" id="prix_unitaire" name="prix_unitaire" 
+                                           value="<?= number_format($besoin['prix_unitaire'], 2, '.', '') ?>" 
+                                           step="0.01" min="0.01" required>
+                                </div>
+                                
+                                <button type="button" id="btnSimuler" class="btn btn-primary w-100">
+                                    <i class="bi bi-calculator"></i> Simuler
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-4">
-                    <a href="/dashboard" class="btn btn-outline-info w-100">
-                        <i class="fas fa-tachometer-alt"></i> Tableau de Bord
-                    </a>
+            </div>
+
+            <!-- Résultat de la simulation -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card" id="resultatSimulation" style="display: none;">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-receipt"></i> Résumé de la Simulation</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <h6 class="text-muted">Montant Brut</h6>
+                                            <h4 id="montantBrut">0 Ar</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <h6 class="text-muted">Frais (<span id="fraisPercent">10</span>%)</h6>
+                                            <h4 id="montantFrais">0 Ar</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card bg-success text-white">
+                                        <div class="card-body text-center">
+                                            <h6>Montant Total</h6>
+                                            <h4 id="montantTotal">0 Ar</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card bg-primary text-white">
+                                        <div class="card-body text-center">
+                                            <h6>Action</h6>
+                                            <button id="btnValider" class="btn btn-light w-100">
+                                                <i class="bi bi-check-circle"></i> Valider l'achat
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Détails du calcul -->
+            <div class="row mt-4" id="detailsCalcul" style="display: none;">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-calculator-fill"></i> Détails du Calcul</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <td>Quantité:</td>
+                                            <td><strong id="detailQuantite">0</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Prix unitaire:</td>
+                                            <td><strong id="detailPrixUnitaire">0 Ar</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Montant brut:</td>
+                                            <td><strong id="detailMontantBrut">0 Ar</strong></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <td>Frais (%):</td>
+                                            <td><strong id="detailFraisPercent">0%</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Montant des frais:</td>
+                                            <td><strong id="detailMontantFrais">0 Ar</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Montant total:</td>
+                                            <td><strong id="detailMontantTotal" class="text-success">0 Ar</strong></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<?php include('includes/footer.php'); ?>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('simulationForm');
+    const btnSimuler = document.getElementById('btnSimuler');
+    const btnValider = document.getElementById('btnValider');
+    const resultatDiv = document.getElementById('resultatSimulation');
+    const detailsDiv = document.getElementById('detailsCalcul');
+    
+    btnSimuler.addEventListener('click', function() {
+        const quantite = parseInt(document.getElementById('quantite').value);
+        const prixUnitaire = parseFloat(document.getElementById('prix_unitaire').value);
+        
+        if (!quantite || !prixUnitaire || quantite <= 0 || prixUnitaire <= 0) {
+            alert('Veuillez remplir correctement tous les champs');
+            return;
+        }
+        
+        // Simuler l'achat
+        fetch('/achats/api/simuler', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                quantite: quantite,
+                prix_unitaire: prixUnitaire
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const sim = data.simulation;
+                
+                // Afficher les résultats
+                document.getElementById('montantBrut').textContent = sim.montant_brut.toLocaleString('fr-FR') + ' Ar';
+                document.getElementById('montantFrais').textContent = sim.montant_frais.toLocaleString('fr-FR') + ' Ar';
+                document.getElementById('montantTotal').textContent = sim.montant_total.toLocaleString('fr-FR') + ' Ar';
+                document.getElementById('fraisPercent').textContent = sim.frais_percent;
+                
+                // Détails du calcul
+                document.getElementById('detailQuantite').textContent = quantite.toLocaleString('fr-FR');
+                document.getElementById('detailPrixUnitaire').textContent = prixUnitaire.toLocaleString('fr-FR') + ' Ar';
+                document.getElementById('detailMontantBrut').textContent = sim.montant_brut.toLocaleString('fr-FR') + ' Ar';
+                document.getElementById('detailFraisPercent').textContent = sim.frais_percent + '%';
+                document.getElementById('detailMontantFrais').textContent = sim.montant_frais.toLocaleString('fr-FR') + ' Ar';
+                document.getElementById('detailMontantTotal').textContent = sim.montant_total.toLocaleString('fr-FR') + ' Ar';
+                
+                resultatDiv.style.display = 'block';
+                detailsDiv.style.display = 'block';
+            } else {
+                alert('Erreur: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Erreur lors de la simulation');
+        });
+    });
+    
+    btnValider.addEventListener('click', function() {
+        if (confirm('Êtes-vous sûr de vouloir valider cet achat ?')) {
+            const formData = new FormData(form);
+            
+            fetch('/achats/valider', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    return response.text();
+                }
+            })
+            .then(data => {
+                if (data) {
+                    // En cas d'erreur, afficher le message
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'alert alert-danger alert-dismissible fade show';
+                    errorDiv.innerHTML = `
+                        <i class="bi bi-exclamation-triangle"></i> ${data}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    document.querySelector('.container').insertBefore(errorDiv, document.querySelector('.row'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Erreur lors de la validation');
+            });
+        }
+    });
+});
+</script>
+
+<?php include('includes/footer.php') ?>

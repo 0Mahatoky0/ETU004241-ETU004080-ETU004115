@@ -302,7 +302,7 @@
                         <i class="fas fa-chevron-down arrow"></i>
                     </a>
                     <div class="dropdown-menu-sidebar" id="distributionDropdown">
-                        <a href="/distribution/simuler" class="dropdown-item-sidebar" data-page="distribution-saisie">
+                        <a href="/dispatch/simulation" class="dropdown-item-sidebar" data-page="distribution-saisie">
                             <i class="fas fa-share-alt"></i>
                             <span>Simulation</span>
                         </a>
