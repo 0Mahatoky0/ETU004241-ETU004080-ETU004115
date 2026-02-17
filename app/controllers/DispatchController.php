@@ -38,7 +38,7 @@ class DispatchController {
         }
         
         if (!$besoin_details) {
-            Flight::redirect('/dispatch/simulation?error=' . urlencode('Besoin non trouvé'));
+            Flight::redirect(BASE_URL . '/dispatch/simulation?error=' . urlencode('Besoin non trouvé'));
             return;
         }
         
@@ -69,13 +69,13 @@ class DispatchController {
             $success = $this->model->simulerDispatch($id_besoin_sinistre, $quantite);
             
             if ($success) {
-                Flight::redirect('/dispatch/simulation?success=dispatch');
+                Flight::redirect(BASE_URL . '/dispatch/simulation?success=dispatch');
             } else {
                 throw new Exception("Erreur lors de la simulation de dispatch");
             }
             
         } catch (Exception $e) {
-            Flight::redirect('/dispatch/simuler/' . $id_besoin_sinistre . '?error=' . urlencode($e->getMessage()));
+            Flight::redirect(BASE_URL . '/dispatch/simuler/' . $id_besoin_sinistre . '?error=' . urlencode($e->getMessage()));
         }
     }
     
@@ -113,7 +113,7 @@ class DispatchController {
         }
         
         if (!$besoin_details) {
-            Flight::redirect('/dispatch/etat?error=' . urlencode('Besoin non trouvé'));
+            Flight::redirect(BASE_URL . '/dispatch/etat?error=' . urlencode('Besoin non trouvé'));
             return;
         }
         

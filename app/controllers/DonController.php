@@ -51,7 +51,7 @@ class DonController {
 
                 $don_id = $this->model->createDon($id_besoin, null, $source, $montant);
                 if ($don_id) {
-                    Flight::redirect('/dashboard');
+                    Flight::redirect(BASE_URL . '/dashboard');
                 } else {
                     throw new Exception("Erreur lors de l'enregistrement du don en argent");
                 }
@@ -73,14 +73,14 @@ class DonController {
                 if ($don_id) {
                     // Créer le mouvement d'entrée automatiquement
                     $this->model->createMouvementDon($don_id, $quantite, 0);
-                    Flight::redirect('/dashboard');
+                    Flight::redirect(BASE_URL . '/dashboard');
                 } else {
                     throw new Exception("Erreur lors de l'enregistrement du don");
                 }
             }
             
         } catch (Exception $e) {
-            Flight::redirect('/dons/saisie?error=' . urlencode($e->getMessage()));
+            Flight::redirect(BASE_URL . '/dons/saisie?error=' . urlencode($e->getMessage()));
         }
     }
     
@@ -151,13 +151,13 @@ class DonController {
                 // Créer le mouvement d'entrée
                 $this->model->createMouvementDon($don_id, $quantite, 0);
                 
-                Flight::redirect('/dons/liste?success=achat');
+                Flight::redirect(BASE_URL . '/dons/liste?success=achat');
             } else {
                 throw new Exception("Erreur lors de l'achat");
             }
             
         } catch (Exception $e) {
-            Flight::redirect('/dons/achat?error=' . urlencode($e->getMessage()));
+            Flight::redirect(BASE_URL . '/dons/achat?error=' . urlencode($e->getMessage()));
         }
     }
     

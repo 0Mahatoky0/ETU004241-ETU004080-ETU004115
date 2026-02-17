@@ -44,9 +44,9 @@ class DonControleur {
         $result = $donModel->insertDon($id_besoin, $quantite, $source, $date);
 
         if ($result) {
-            Flight::redirect('/dashboard');
+            Flight::redirect(BASE_URL . '/dashboard');
         } else {
-            Flight::redirect('/dons/add');
+            Flight::redirect(BASE_URL . '/dons/add');
         }
     }
 

@@ -6,7 +6,7 @@
     <title>BNGRC - Gestion des Besoins et Dons</title>
     
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="<?= BASE_URL ?>/assets/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
@@ -240,7 +240,7 @@
             <ul class="list-unstyled">
                 <!-- Tableau de bord -->
                 <li class="nav-item">
-                    <a href="/dashboard" class="sidebar-link" data-page="dashboard">
+                    <a href="<?= BASE_URL ?>/dashboard" class="sidebar-link" data-page="dashboard">
                         <i class="fas fa-tachometer-alt"></i>
                         <span>Tableau de Bord</span>
                     </a>
@@ -256,11 +256,11 @@
                         <i class="fas fa-chevron-down arrow"></i>
                     </a>
                     <div class="dropdown-menu-sidebar" id="besoinsDropdown">
-                        <a href="/besoins/saisie" class="dropdown-item-sidebar" data-page="besoins-saisie">
+                        <a href="<?= BASE_URL ?>/besoins/saisie" class="dropdown-item-sidebar" data-page="besoins-saisie">
                             <i class="fas fa-plus-circle"></i>
                             <span>Saisir un besoin</span>
                         </a>
-                        <a href="/besoins/liste" class="dropdown-item-sidebar" data-page="besoins-liste">
+                        <a href="<?= BASE_URL ?>/besoins/liste" class="dropdown-item-sidebar" data-page="besoins-liste">
                             <i class="fas fa-list-ul"></i>
                             <span>Liste des besoins</span>
                         </a>
@@ -277,15 +277,15 @@
                         <i class="fas fa-chevron-down arrow"></i>
                     </a>
                     <div class="dropdown-menu-sidebar" id="donsDropdown">
-                        <a href="/dons/saisie" class="dropdown-item-sidebar" data-page="dons-saisie">
+                        <a href="<?= BASE_URL ?>/dons/saisie" class="dropdown-item-sidebar" data-page="dons-saisie">
                             <i class="fas fa-plus-circle"></i>
                             <span>Saisir un don</span>
                         </a>
-                        <a href="/besoins/liste" class="dropdown-item-sidebar" data-page="dons-achat">
+                        <a href="<?= BASE_URL ?>/besoins/liste" class="dropdown-item-sidebar" data-page="dons-achat">
                             <i class="fas fa-shopping-cart"></i>
                             <span>Acheter avec dons</span>
                         </a>
-                        <a href="/dons/liste" class="dropdown-item-sidebar" data-page="dons-liste">
+                        <a href="<?= BASE_URL ?>/dons/liste" class="dropdown-item-sidebar" data-page="dons-liste">
                             <i class="fas fa-list-ul"></i>
                             <span>Liste des dons</span>
                         </a>
@@ -302,11 +302,11 @@
                         <i class="fas fa-chevron-down arrow"></i>
                     </a>
                     <div class="dropdown-menu-sidebar" id="distributionDropdown">
-                        <a href="/distribution" class="dropdown-item-sidebar" data-page="distribution-index">
+                        <a href="<?= BASE_URL ?>/distribution" class="dropdown-item-sidebar" data-page="distribution-index">
                             <i class="fas fa-cogs"></i>
                             <span>Gestion Distribution</span>
                         </a>
-                        <a href="/distribution/recap" class="dropdown-item-sidebar" data-page="distribution-recap">
+                        <a href="<?= BASE_URL ?>/distribution/recap" class="dropdown-item-sidebar" data-page="distribution-recap">
                             <i class="fas fa-chart-bar"></i>
                             <span>Récapitulatif</span>
                         </a>

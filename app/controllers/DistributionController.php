@@ -38,10 +38,10 @@ class DistributionController {
             // Stocker la simulation en session
             $_SESSION['distribution'] = $distribution;
             
-            Flight::redirect('/distribution?simulation=1');
+            Flight::redirect(BASE_URL . '/distribution?simulation=1');
             
         } catch (Exception $e) {
-            Flight::redirect('/distribution?error=' . urlencode($e->getMessage()));
+            Flight::redirect(BASE_URL . '/distribution?error=' . urlencode($e->getMessage()));
         }
     }
     
@@ -58,13 +58,13 @@ class DistributionController {
             if ($success) {
                 // Supprimer la simulation de la session
                 unset($_SESSION['distribution']);
-                Flight::redirect('/distribution?valide=1');
+                Flight::redirect(BASE_URL . '/distribution?valide=1');
             } else {
                 throw new Exception("Erreur lors de la validation de la distribution");
             }
             
         } catch (Exception $e) {
-            Flight::redirect('/distribution?error=' . urlencode($e->getMessage()));
+            Flight::redirect(BASE_URL . '/distribution?error=' . urlencode($e->getMessage()));
         }
     }
     
@@ -75,13 +75,13 @@ class DistributionController {
             if ($success) {
                 // Supprimer la simulation de la session si elle existe
                 unset($_SESSION['distribution']);
-                Flight::redirect('/distribution?reinitialise=1');
+                Flight::redirect(BASE_URL . '/distribution?reinitialise=1');
             } else {
                 throw new Exception("Erreur lors de la réinitialisation");
             }
             
         } catch (Exception $e) {
-            Flight::redirect('/distribution?error=' . urlencode($e->getMessage()));
+            Flight::redirect(BASE_URL . '/distribution?error=' . urlencode($e->getMessage()));
         }
     }
     
@@ -138,10 +138,10 @@ class DistributionController {
             $_SESSION['distribution_proportionnelle'] = $distribution;
             $_SESSION['distribution_type'] = 'proportionnelle';
             
-            Flight::redirect('/distribution?simulation_proportionnelle=1');
+            Flight::redirect(BASE_URL . '/distribution?simulation_proportionnelle=1');
             
         } catch (Exception $e) {
-            Flight::redirect('/distribution?error=' . urlencode($e->getMessage()));
+            Flight::redirect(BASE_URL . '/distribution?error=' . urlencode($e->getMessage()));
         }
     }
     
@@ -159,13 +159,13 @@ class DistributionController {
                 // Supprimer la simulation de la session
                 unset($_SESSION['distribution_proportionnelle']);
                 unset($_SESSION['distribution_type']);
-                Flight::redirect('/distribution?valide_proportionnelle=1');
+                Flight::redirect(BASE_URL . '/distribution?valide_proportionnelle=1');
             } else {
                 throw new Exception("Erreur lors de la validation de la distribution proportionnelle");
             }
             
         } catch (Exception $e) {
-            Flight::redirect('/distribution?error=' . urlencode($e->getMessage()));
+            Flight::redirect(BASE_URL . '/distribution?error=' . urlencode($e->getMessage()));
         }
     }
     

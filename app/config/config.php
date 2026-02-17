@@ -4,6 +4,8 @@
  *         Application Environment            *
  **********************************************/
 
+define('BASE_URL', rtrim(dirname($_SERVER['SCRIPT_NAME']), '/'));
+
 date_default_timezone_set('UTC');
 
 error_reporting(E_ALL);
@@ -48,10 +50,16 @@ return [
 	 **************************************/
 	'database' => [
 		// MySQL Example:
-		'host'     => 'localhost',      // Database host (e.g., 'localhost', 'db.example.com')
-		'dbname'   => 'db_s2_ETU004241',   // Database name (e.g., 'flightphp')
-		'user'     => 'ETU004241',  // Database user (e.g., 'root')
-		'password' => '06xo2Gwu',  // Database password (never commit real passwords)
+		// 'host'     => 'localhost',      // Database host (e.g., 'localhost', 'db.example.com')
+		// 'dbname'   => 'db_s2_ETU004241',   // Database name (e.g., 'flightphp')
+		// 'user'     => 'ETU004241',  // Database user (e.g., 'root')
+		// 'password' => '06xo2Gwu',  // Database password (never commit real passwords)
+
+
+		'host'     => '127.0.0.1',      // Database host (e.g., 'localhost', 'db.example.com')
+		'dbname'   => 'bngrc',   // Database name (e.g., 'flightphp')
+		'user'     => 'root',  // Database user (e.g., 'root')
+		'password' => '',  // Database password (never commit real passwords)
 	],
 
 	// Google OAuth Credentials

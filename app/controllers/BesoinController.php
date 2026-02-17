@@ -50,13 +50,13 @@ class BesoinController {
             $success = $this->model->createBesoinSinistre($id_ville, $id_besoin, $quantite, $id_status);
             
             if ($success) {
-                Flight::redirect('/besoins/liste?success=1');
+                Flight::redirect(BASE_URL . '/besoins/liste?success=1');
             } else {
                 throw new Exception("Erreur lors de l'enregistrement du besoin");
             }
             
         } catch (Exception $e) {
-            Flight::redirect('/besoins/saisie?error=' . urlencode($e->getMessage()));
+            Flight::redirect(BASE_URL . '/besoins/saisie?error=' . urlencode($e->getMessage()));
         }
     }
     

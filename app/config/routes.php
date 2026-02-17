@@ -211,7 +211,7 @@ $router->get('/api/dons/montant/@id_categorie', function($id_categorie) {
 
 // Route par défaut vers le tableau de bord
 $router->get('/', function() {
-    Flight::redirect('/dashboard');
+    Flight::redirect(BASE_URL . '/dashboard');
 });
 
 ?>

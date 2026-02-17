@@ -36,7 +36,7 @@ class AchatController {
         $id_besoin_sinistre = Flight::request()->query['id'] ?? null;
         
         if (!$id_besoin_sinistre) {
-            Flight::redirect('/achats/besoins-restants?error=' . urlencode('Besoin non spécifié'));
+            Flight::redirect(BASE_URL . '/achats/besoins-restants?error=' . urlencode('Besoin non spécifié'));
             return;
         }
         
@@ -52,7 +52,7 @@ class AchatController {
         }
         
         if (!$besoin) {
-            Flight::redirect('/achats/besoins-restants?error=' . urlencode('Besoin non trouvé ou déjà couvert'));
+            Flight::redirect(BASE_URL . '/achats/besoins-restants?error=' . urlencode('Besoin non trouvé ou déjà couvert'));
             return;
         }
         
@@ -132,10 +132,10 @@ class AchatController {
             
             $resultat = $this->model->validerAchat($id_besoin_sinistre, $quantite, $id_besoin, $id_ville, $prix_unitaire);
             
-            Flight::redirect('/achats/liste?success=' . urlencode('Achat enregistré avec succès - Montant total: ' . number_format($resultat['montant_total'], 2, ',', ' ') . ' Ar'));
+            Flight::redirect(BASE_URL . '/achats/liste?success=' . urlencode('Achat enregistré avec succès - Montant total: ' . number_format($resultat['montant_total'], 2, ',', ' ') . ' Ar'));
             
         } catch (Exception $e) {
-            Flight::redirect('/achats/simulation?id=' . $id_besoin_sinistre . '&error=' . urlencode($e->getMessage()));
+            Flight::redirect(BASE_URL . '/achats/simulation?id=' . $id_besoin_sinistre . '&error=' . urlencode($e->getMessage()));
         }
     }
     
@@ -178,7 +178,7 @@ class AchatController {
                 
                 $this->model->updateFraisAchat($frais_percent);
                 
-                Flight::redirect('/achats/configuration?success=' . urlencode('Configuration mise à jour avec succès'));
+                Flight::redirect(BASE_URL . '/achats/configuration?success=' . urlencode('Configuration mise à jour avec succès'));
                 
             } catch (Exception $e) {
                 Flight::render('achats/configuration', [

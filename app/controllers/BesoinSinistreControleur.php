@@ -46,9 +46,9 @@ class BesoinSinistreControleur
         $result = $besoinSinistreModel->addBesoinSinistre($id_ville, $id_besoin, $quantite);
 
         if ($result) {
-            Flight::redirect('/dashboard');
+            Flight::redirect(BASE_URL . '/dashboard');
         } else {
-            Flight::redirect('/besoin_sinistre/add');
+            Flight::redirect(BASE_URL . '/besoin_sinistre/add');
         }
     }
 }
