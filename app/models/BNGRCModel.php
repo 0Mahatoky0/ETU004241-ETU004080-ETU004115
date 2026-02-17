@@ -989,6 +989,120 @@ class BNGRCModel {
         }
     }
     
+    // ===== FONCTIONNALITÉS DE DISTRIBUTION PRIORITAIRE =====
+    
+    public function getBesoinsTriesParQuantite() {
+        $stmt = $this->db->query("
+            SELECT 
+                bs.id,
+                bs.quantite_initiale,
+                bs.quantite_restante,
+                b.libelle as besoin_libelle,
+                cb.libelle as categorie_libelle,
+                v.libelle as ville_libelle,
+                r.libelle as region_libelle,
+                b.prix_unitaire,
+                bs.date
+            FROM besoin_sinistre bs
+            JOIN besoin b ON bs.id_besoin = b.id
+            JOIN categorie_besoin cb ON b.id_categorie = cb.id
+            JOIN ville v ON bs.id_ville = v.id
+            JOIN region r ON v.id_region = r.id
+            WHERE bs.quantite_restante > 0
+            ORDER BY bs.quantite_restante ASC, bs.date ASC
+        ");
+        return $stmt->fetchAll();
+    }
+    
+    public function simulerDistributionPrioritaire() {
+        $besoins = $this->getBesoinsTriesParQuantite();
+        $stock = $this->getStockBngrc();
+        
+        $distribution = [];
+        $stock_disponible = [];
+        
+        // Organiser le stock disponible par type de besoin
+        foreach ($stock as $item) {
+            $stock_disponible[$item['id_besoin']] = $item['quantite'];
+        }
+        
+        // Distribution prioritaire : besoins les plus petits d'abord
+        foreach ($besoins as $besoin) {
+            $id_besoin_sinistre = $besoin['id'];
+            $id_besoin_type = $this->getBesoinTypeById($besoin['id']);
+            $quantite_necessaire = $besoin['quantite_restante'];
+            $quantite_disponible = $stock_disponible[$id_besoin_type] ?? 0;
+            
+            // Allouer le maximum possible (priorité aux petits besoins)
+            $quantite_allouee = min($quantite_necessaire, $quantite_disponible);
+            
+            if ($quantite_allouee > 0) {
+                $distribution[] = [
+                    'id_besoin_sinistre' => $id_besoin_sinistre,
+                    'id_besoin_type' => $id_besoin_type,
+                    'besoin_libelle' => $besoin['besoin_libelle'],
+                    'ville_libelle' => $besoin['ville_libelle'],
+                    'quantite_requise' => $quantite_necessaire,
+                    'quantite_allouee' => $quantite_allouee,
+                    'quantite_restante_apres' => $quantite_necessaire - $quantite_allouee,
+                    'priorite' => 'Haute',
+                    'pourcentage_satisfaction' => round(($quantite_allouee / $quantite_necessaire) * 100, 2)
+                ];
+                
+                // Mettre à jour le stock disponible pour la suite
+                $stock_disponible[$id_besoin_type] -= $quantite_allouee;
+            }
+        }
+        
+        return [
+            'distribution' => $distribution,
+            'total_besoins' => count($besoins),
+            'stock_total_initial' => array_sum(array_column($stock, 'quantite')),
+            'stock_distribue' => array_sum(array_column($distribution, 'quantite_allouee')),
+            'stock_restant' => array_sum($stock_disponible),
+            'besoins_satisfaits' => count(array_filter($distribution, fn($d) => $d['quantite_restante_apres'] == 0)),
+            'besoins_partiels' => count(array_filter($distribution, fn($d) => $d['quantite_restante_apres'] > 0))
+        ];
+    }
+    
+    public function validerDistributionPrioritaire($distribution_data) {
+        $this->db->beginTransaction();
+        
+        try {
+            foreach ($distribution_data['distribution'] as $item) {
+                $id_besoin_sinistre = $item['id_besoin_sinistre'];
+                $quantite_allouee = $item['quantite_allouee'];
+                $id_besoin_type = $item['id_besoin_type'];
+                
+                // Mettre à jour la quantité restante dans besoin_sinistre
+                $stmt = $this->db->prepare("
+                    UPDATE besoin_sinistre 
+                    SET quantite_restante = quantite_restante - ? 
+                    WHERE id = ? AND quantite_restante >= ?
+                ");
+                $stmt->execute([$quantite_allouee, $id_besoin_sinistre, $quantite_allouee]);
+                
+                // Mettre à jour le stock dans stock_bngrc
+                $stmt = $this->db->prepare("
+                    UPDATE stock_bngrc 
+                    SET quantite = quantite - ? 
+                    WHERE id_besoin = ? AND quantite >= ?
+                ");
+                $stmt->execute([$quantite_allouee, $id_besoin_type, $quantite_allouee]);
+                
+                // Créer un mouvement de don pour le suivi
+                $this->createMouvementDonForDistribution($id_besoin_sinistre, $quantite_allouee);
+            }
+            
+            $this->db->commit();
+            return true;
+            
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            throw $e;
+        }
+    }
+    
     private function createMouvementDonGlobal($quantite) {
         // Créer un mouvement de don global pour suivre la distribution proportionnelle
         $stmt = $this->db->prepare("

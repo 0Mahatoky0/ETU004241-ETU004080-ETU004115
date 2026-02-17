@@ -1,7 +1,15 @@
 <?php
-$distribution_en_cours = isset($_SESSION['distribution']) ? $_SESSION['distribution'] : null;
-$distribution_proportionnelle_en_cours = isset($_SESSION['distribution_proportionnelle']) ? $_SESSION['distribution_proportionnelle'] : null;
+// Variables passées par le contrôleur
+$distribution_en_cours = $distribution_en_cours ?? null;
+$distribution_proportionnelle_en_cours = $distribution_proportionnelle_en_cours ?? null;
+$distribution_prioritaire_en_cours = $distribution_prioritaire_en_cours ?? null;
 $distribution_type = $_SESSION['distribution_type'] ?? 'classique';
+
+// Debug temporaire
+error_log("View - Distribution en cours: " . ($distribution_en_cours ? "YES" : "NO"));
+error_log("View - Distribution proportionnelle: " . ($distribution_proportionnelle_en_cours ? "YES" : "NO"));
+error_log("View - Distribution prioritaire: " . ($distribution_prioritaire_en_cours ? "YES" : "NO"));
+error_log("View - Distribution type: " . $distribution_type);
 ?>
 
 <?php include __DIR__ . '/../../../public/includes/header.php'; ?>
@@ -220,13 +228,21 @@ $distribution_type = $_SESSION['distribution_type'] ?? 'classique';
                         <?= count($distribution_proportionnelle_en_cours['distribution']) ?> allocations prêtes à être validées
                     </div>
                 <?php endif; ?>
+                
+                <?php if ($distribution_prioritaire_en_cours && $distribution_type == 'prioritaire'): ?>
+                    <div class="alert alert-warning mt-3">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Simulation prioritaire en cours:</strong> 
+                        <?= count($distribution_prioritaire_en_cours['distribution']) ?> allocations prêtes à être validées
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Résultat de la simulation classique -->
-<?php if ($distribution_en_cours && $distribution_type == 'classique'): ?>
+<?php if ($distribution_en_cours): ?>
 <div class="row mb-4">
     <div class="col-12">
         <div class="card border-success">
@@ -294,7 +310,7 @@ $distribution_type = $_SESSION['distribution_type'] ?? 'classique';
 <?php endif; ?>
 
 <!-- Résultat de la simulation proportionnelle -->
-<?php if ($distribution_proportionnelle_en_cours && $distribution_type == 'proportionnelle'): ?>
+<?php if ($distribution_proportionnelle_en_cours): ?>
 <div class="row mb-4">
     <div class="col-12">
         <div class="card border-info">
@@ -412,6 +428,53 @@ $distribution_type = $_SESSION['distribution_type'] ?? 'classique';
 </div>
 <?php endif; ?>
 
+<!-- Résultat de la simulation prioritaire -->
+<?php if ($distribution_prioritaire_en_cours): ?>
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-warning">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i class="fas fa-exclamation-triangle"></i> Résultat de la Simulation Prioritaire
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Distribution prioritaire:</strong> Les besoins les plus petits sont servis en premier.
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Besoin</th>
+                                <th>Ville</th>
+                                <th>Requis</th>
+                                <th>Alloué</th>
+                                <th>Satisfaction</th>
+                                <th>Reste</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($distribution_prioritaire_en_cours['distribution'] as $item): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($item['besoin_libelle']) ?></td>
+                                <td><?= htmlspecialchars($item['ville_libelle']) ?></td>
+                                <td><span class="badge bg-warning"><?= number_format($item['quantite_requise']) ?></span></td>
+                                <td><span class="badge bg-success"><?= number_format($item['quantite_allouee']) ?></span></td>
+                                <td><span class="badge bg-info"><?= $item['pourcentage_satisfaction'] ?>%</span></td>
+                                <td><span class="badge <?= $item['quantite_restante_apres'] > 0 ? 'bg-warning' : 'bg-success' ?>"><?= number_format($item['quantite_restante_apres']) ?></span></td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
 <!-- Besoins en attente -->
 <div class="row mb-4">
     <div class="col-md-6">
@@ -518,6 +581,9 @@ function changerTypeDistribution(type) {
     <?php if ($distribution_proportionnelle_en_cours && $distribution_type == 'proportionnelle'): ?>
         if (type === 'proportionnelle') hasSimulation = true;
     <?php endif; ?>
+    <?php if ($distribution_prioritaire_en_cours && $distribution_type == 'prioritaire'): ?>
+        if (type === 'prioritaire') hasSimulation = true;
+    <?php endif; ?>
     
     // Activer/désactiver le bouton valider selon la simulation
     document.getElementById('btn_valider').disabled = !hasSimulation;
@@ -532,8 +598,7 @@ function simulerDistribution() {
         }
     } else if (type === 'prioritaire') {
         if (confirm('Voulez-vous lancer la simulation de distribution PRIORITAIRE?')) {
-            alert('Fonctionnalité prioritaire en cours de développement...');
-            // window.location.href = '/distribution/simuler-prioritaire';
+            window.location.href = '/distribution/simuler-prioritaire';
         }
     } else {
         if (confirm('Voulez-vous lancer la simulation de distribution CLASSIQUE?')) {
@@ -550,9 +615,8 @@ function validerDistribution() {
             window.location.href = '/distribution/valider-proportionnelle';
         }
     } else if (type === 'prioritaire') {
-        if (confirm('Fonctionnalité prioritaire en cours de développement...')) {
-            alert('Fonctionnalité prioritaire en cours de développement...');
-            // window.location.href = '/distribution/valider-prioritaire';
+        if (confirm('ATTENTION: Cette action va valider et enregistrer la distribution PRIORITAIRE. Voulez-vous continuer?')) {
+            window.location.href = '/distribution/valider-prioritaire';
         }
     } else {
         if (confirm('ATTENTION: Cette action va valider et enregistrer la distribution CLASSIQUE. Voulez-vous continuer?')) {
@@ -578,6 +642,9 @@ document.addEventListener('DOMContentLoaded', function() {
         hasSimulation = true;
     <?php endif; ?>
     <?php if ($distribution_proportionnelle_en_cours && $distribution_type == 'proportionnelle'): ?>
+        hasSimulation = true;
+    <?php endif; ?>
+    <?php if ($distribution_prioritaire_en_cours && $distribution_type == 'prioritaire'): ?>
         hasSimulation = true;
     <?php endif; ?>
     
