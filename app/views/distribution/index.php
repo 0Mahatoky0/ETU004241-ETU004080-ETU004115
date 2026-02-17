@@ -510,8 +510,17 @@ function changerTypeDistribution(type) {
     // Réactiver le bouton distribuer
     document.getElementById('btn_distribuer').disabled = false;
     
-    // Désactiver le bouton valider
-    document.getElementById('btn_valider').disabled = true;
+    // Vérifier s'il y a une simulation en cours pour ce type
+    var hasSimulation = false;
+    <?php if ($distribution_en_cours && $distribution_type == 'classique'): ?>
+        if (type === 'classique') hasSimulation = true;
+    <?php endif; ?>
+    <?php if ($distribution_proportionnelle_en_cours && $distribution_type == 'proportionnelle'): ?>
+        if (type === 'proportionnelle') hasSimulation = true;
+    <?php endif; ?>
+    
+    // Activer/désactiver le bouton valider selon la simulation
+    document.getElementById('btn_valider').disabled = !hasSimulation;
 }
 
 function simulerDistribution() {
@@ -562,6 +571,19 @@ function reinitialiserDistribution() {
 document.addEventListener('DOMContentLoaded', function() {
     var type = document.querySelector('input[name="distribution_type"]:checked')?.value || 'classique';
     changerTypeDistribution(type);
+    
+    // Vérifier s'il y a une simulation en cours et activer le bouton valider
+    var hasSimulation = false;
+    <?php if ($distribution_en_cours && $distribution_type == 'classique'): ?>
+        hasSimulation = true;
+    <?php endif; ?>
+    <?php if ($distribution_proportionnelle_en_cours && $distribution_type == 'proportionnelle'): ?>
+        hasSimulation = true;
+    <?php endif; ?>
+    
+    if (hasSimulation) {
+        document.getElementById('btn_valider').disabled = false;
+    }
 });
 </script>
 
