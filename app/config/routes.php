@@ -154,7 +154,7 @@ $router->get('/api/distribution/simulation', function() {
 });
 
 $router->get('/api/distribution/statistiques', function() {
-    $controller = new app\controllers\DistributionController();
+    $controller = new app\controllers\DistributionController;
     $controller->apiStatistiques();
 });
 
