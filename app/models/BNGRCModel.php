@@ -66,12 +66,12 @@ class BNGRCModel {
     
     // ===== SAISIE DES BESOINS PAR VILLE =====
     
-    public function createBesoinSinistre($id_region, $id_ville, $id_besoin, $quantite, $id_status = 2) {
+    public function createBesoinSinistre($id_ville, $id_besoin, $quantite, $id_status = 2) {
         $stmt = $this->db->prepare("
-            INSERT INTO besoin_sinistre (id_region, id_ville, id_besoin, quantite, id_status_besoin_ville) 
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO besoin_sinistre (id_ville, id_besoin, quantite, id_status_besoin_sinistre) 
+            VALUES (?, ?, ?, ?)
         ");
-        return $stmt->execute([$id_region, $id_ville, $id_besoin, $quantite, $id_status]);
+        return $stmt->execute([$id_ville, $id_besoin, $quantite, $id_status]);
     }
     
     public function getBesoinsSinistreByVille($id_ville) {
@@ -82,9 +82,9 @@ class BNGRCModel {
             FROM besoin_sinistre bs
             JOIN besoin b ON bs.id_besoin = b.id
             JOIN categorie_besoin cb ON b.id_categorie = cb.id
-            JOIN status_besoin_sinistre sbs ON bs.id_status_besoin_ville = sbs.id
+            JOIN status_besoin_sinistre sbs ON bs.id_status_besoin_sinistre = sbs.id
             JOIN ville v ON bs.id_ville = v.id
-            JOIN region r ON bs.id_region = r.id
+            JOIN region r ON v.id_region = r.id
             WHERE bs.id_ville = ?
             ORDER BY cb.libelle, b.libelle
         ");
@@ -100,9 +100,9 @@ class BNGRCModel {
             FROM besoin_sinistre bs
             JOIN besoin b ON bs.id_besoin = b.id
             JOIN categorie_besoin cb ON b.id_categorie = cb.id
-            JOIN status_besoin_sinistre sbs ON bs.id_status_besoin_ville = sbs.id
+            JOIN status_besoin_sinistre sbs ON bs.id_status_besoin_sinistre = sbs.id
             JOIN ville v ON bs.id_ville = v.id
-            JOIN region r ON bs.id_region = r.id
+            JOIN region r ON v.id_region = r.id
             ORDER BY r.libelle, v.libelle, cb.libelle, b.libelle
         ");
         return $stmt->fetchAll();
@@ -145,12 +145,9 @@ class BNGRCModel {
     
     // ===== MOUVEMENTS DE DONS =====
     
-    public function createMouvementDon($id_dons, $entrer, $sortie, $id_besoin_ville = null) {
-        $stmt = $this->db->prepare("
-            INSERT INTO mvt_dons (id_dons, entrer, sortie, id_besoin_ville, date) 
-            VALUES (?, ?, ?, ?, NOW())
-        ");
-        return $stmt->execute([$id_dons, $entrer, $sortie, $id_besoin_ville]);
+    public function createMouvementDon($id_dons, $entrer, $sortie, $id_besoin_sinistre = null) {
+        $stmt = $this->db->prepare("\n            INSERT INTO mvt_dons (id_dons, entrer, sortie, id_besoin_sinistre, date) \n            VALUES (?, ?, ?, ?, NOW())\n        ");
+        return $stmt->execute([$id_dons, $entrer, $sortie, $id_besoin_sinistre]);
     }
     
     public function getAllMouvementsDons() {
@@ -160,7 +157,7 @@ class BNGRCModel {
             FROM mvt_dons md
             JOIN dons d ON md.id_dons = d.id
             JOIN besoin b ON d.id_besoin = b.id
-            LEFT JOIN besoin_sinistre bs ON md.id_besoin_ville = bs.id
+                LEFT JOIN besoin_sinistre bs ON md.id_besoin_sinistre = bs.id
             LEFT JOIN ville v ON bs.id_ville = v.id
             ORDER BY md.date DESC
         ");
@@ -320,6 +317,41 @@ class BNGRCModel {
             GROUP BY r.id, r.libelle
             ORDER BY r.libelle
         ");
+        return $stmt->fetchAll();
+    }
+
+    public function getDashboardByVille() {
+        $sql = <<<'SQL'
+            SELECT 
+                v.id as ville_id,
+                v.libelle as ville_libelle,
+                COUNT(DISTINCT bs.id) as nombre_besoins,
+                COALESCE(COUNT(DISTINCT md.id_dons), 0) as nombre_dons,
+                SUM(bs.quantite) as quantite_totale_besoins,
+                COALESCE(SUM(md.sortie), 0) as quantite_allouee,
+                SUM(bs.quantite) - COALESCE(SUM(md.sortie), 0) as quantite_restante
+            FROM ville v
+            LEFT JOIN besoin_sinistre bs ON v.id = bs.id_ville
+            LEFT JOIN mvt_dons md ON bs.id = md.id_besoin_sinistre
+            GROUP BY v.id, v.libelle
+            ORDER BY v.libelle
+        SQL;
+
+        $stmt = $this->db->query($sql);
+        return $stmt->fetchAll();
+    }
+
+    public function getDonsByVille($id_ville) {
+        $stmt = $this->db->prepare("
+            SELECT d.*, b.libelle as besoin_libelle, cb.libelle as categorie_libelle, bs.id_ville
+            FROM dons d
+            JOIN besoin b ON d.id_besoin = b.id
+            JOIN categorie_besoin cb ON b.id_categorie = cb.id
+            JOIN besoin_sinistre bs ON b.id = bs.id_besoin
+            WHERE bs.id_ville = ?
+            ORDER BY d.date DESC
+        ");
+        $stmt->execute([$id_ville]);
         return $stmt->fetchAll();
     }
 }

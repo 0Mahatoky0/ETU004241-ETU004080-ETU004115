@@ -16,13 +16,13 @@ class DashboardController {
     
     public function index() {
         $stats = $this->model->getDashboardStats();
-        $stats_by_region = $this->model->getDashboardByRegion();
+        $stats_by_ville = $this->model->getDashboardByVille();
         $stock_disponible = $this->model->getStockDisponible();
         $besoins_non_satisfaits = $this->model->getBesoinsNonSatisfaits();
         
         Flight::render('dashboard/index', [
             'stats' => $stats,
-            'stats_by_region' => $stats_by_region,
+            'stats_by_ville' => $stats_by_ville,
             'stock_disponible' => $stock_disponible,
             'besoins_non_satisfaits' => $besoins_non_satisfaits
         ]);
@@ -32,7 +32,7 @@ class DashboardController {
     
     public function getChartData() {
         $stats = $this->model->getDashboardStats();
-        $stats_by_region = $this->model->getDashboardByRegion();
+        $stats_by_region = $this->model->getDashboardByVille();
         
         Flight::json([
             'stats' => $stats,

@@ -46,7 +46,8 @@ class BesoinController {
                 throw new Exception("La quantité doit être supérieure à 0");
             }
             
-            $success = $this->model->createBesoinSinistre($id_region, $id_ville, $id_besoin, $quantite, $id_status);
+            // the besoin_sinistre table does not store region directly; pass ville, besoin, quantite, status
+            $success = $this->model->createBesoinSinistre($id_ville, $id_besoin, $quantite, $id_status);
             
             if ($success) {
                 Flight::redirect('/besoins/liste?success=1');
@@ -82,6 +83,26 @@ class BesoinController {
         Flight::render('besoins/par_ville', [
             'ville' => $ville_info,
             'besoins' => $besoins
+        ]);
+    }
+
+    public function detailsVille($id_ville) {
+        $ville_info = null;
+        $villes = $this->model->getAllVilles();
+        foreach ($villes as $v) {
+            if ($v['id'] == $id_ville) {
+                $ville_info = $v;
+                break;
+            }
+        }
+
+        $besoins = $this->model->getBesoinsSinistreByVille($id_ville);
+        $dons = $this->model->getDonsByVille($id_ville);
+
+        Flight::render('besoins/details', [
+            'ville' => $ville_info,
+            'besoins' => $besoins,
+            'dons' => $dons
         ]);
     }
     
