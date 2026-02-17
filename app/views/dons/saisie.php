@@ -1,4 +1,4 @@
-<?php include(BASE_URL . '/includes/header.php'); ?>
+<?php include(BASE_URL . 'includes/header.php'); ?>
 
 <div class="container-fluid px-4 py-4">
     <!-- En-tête -->
@@ -383,4 +383,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<?php include(BASE_URL . '/includes/footer.php'); ?>
+<?php include(BASE_URL . 'includes/footer.php'); ?>

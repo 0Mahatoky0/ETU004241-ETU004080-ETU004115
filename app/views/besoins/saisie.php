@@ -1,4 +1,4 @@
-<?php include(BASE_URL . '/includes/header.php'); ?>
+<?php include(BASE_URL . 'includes/header.php'); ?>
 
 <div class="container mt-4">
     <div class="row">
@@ -182,4 +182,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<?php include(BASE_URL . '/includes/footer.php'); ?>
+<?php include(BASE_URL . 'includes/footer.php'); ?>
