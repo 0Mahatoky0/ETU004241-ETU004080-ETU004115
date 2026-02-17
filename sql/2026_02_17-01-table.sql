@@ -61,6 +61,8 @@ CREATE TABLE dons (
     FOREIGN KEY (id_besoin) REFERENCES besoin(id)
 );
 
+ALTER TABLE dons ADD COLUMN montant DECIMAL(10,2);
+
 
 CREATE TABLE mvt_dons (
     id INT AUTO_INCREMENT PRIMARY KEY,

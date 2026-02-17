@@ -84,9 +84,9 @@ $router->get('/dons/liste', function() {
     $controller->listeDons();
 });
 
-$router->get('/dons/achat', function() {
+$router->get('/dons/achat/@id_besoin', function($id_besoin) {
     $controller = new app\controllers\DonController();
-    $controller->achatAvecDons();
+    $controller->achatAvecDons($id_besoin);
 });
 
 $router->post('/dons/process-achat', function() {
@@ -139,6 +139,17 @@ $router->get('/api/stock/disponible', function() {
 $router->get('/api/besoins/non-satisfaits', function() {
     $controller = new app\controllers\DispatchController();
     $controller->getBesoinsNonSatisfaits();
+});
+
+// API: montant total des dons pour une catégorie (par défaut id=3)
+$router->get('/api/dons/montant', function() {
+    $controller = new app\controllers\DonController();
+    $controller->apiMontantByCategorie();
+});
+
+$router->get('/api/dons/montant/@id_categorie', function($id_categorie) {
+    $controller = new app\controllers\DonController();
+    $controller->apiMontantByCategorie($id_categorie);
 });
 
 // Route par défaut vers le tableau de bord
