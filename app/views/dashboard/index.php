@@ -113,33 +113,39 @@
         </div>
     </div>
     
-    <!-- Statistiques par région -->
+    <!-- Statistiques par ville -->
     <div class="card">
         <div class="card-header">
-            <h5 class="mb-0"><i class="fas fa-map-marked-alt me-2"></i> Statistiques par Région</h5>
+            <h5 class="mb-0"><i class="fas fa-city me-2"></i> Statistiques par Ville</h5>
         </div>
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>Région</th>
+                            <th>Ville</th>
                             <th>Nombre Besoins</th>
+                            <th>Nombre Dons</th>
                             <th>Quantité Totale</th>
                             <th>Quantité Assignée</th>
                             <th>Quantité Restante</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($stats_by_region as $region): ?>
+                        <?php foreach ($stats_by_ville as $ville): ?>
                             <tr>
-                                <td><strong><?php echo htmlspecialchars($region['region_libelle']); ?></strong></td>
-                                <td><?php echo $region['nombre_besoins']; ?></td>
-                                <td><?php echo number_format($region['quantite_totale_besoins']); ?></td>
-                                <td><?php echo number_format($region['quantite_allouee']); ?></td>
                                 <td>
-                                    <span class="badge bg-<?php echo $region['quantite_restante'] > 0 ? 'warning' : 'success'; ?>">
-                                        <?php echo number_format($region['quantite_restante']); ?>
+                                    <a href="/besoins/ville/<?php echo htmlspecialchars($ville['ville_id']); ?>/details" class="ville-link">
+                                        <strong><?php echo htmlspecialchars($ville['ville_libelle']); ?></strong>
+                                    </a>
+                                </td>
+                                <td><?php echo $ville['nombre_besoins']; ?></td>
+                                <td><?php echo $ville['nombre_dons'] ?? 0; ?></td>
+                                <td><?php echo number_format($ville['quantite_totale_besoins']); ?></td>
+                                <td><?php echo number_format($ville['quantite_allouee']); ?></td>
+                                <td>
+                                    <span class="badge bg-<?php echo $ville['quantite_restante'] > 0 ? 'warning' : 'success'; ?>">
+                                        <?php echo number_format($ville['quantite_restante']); ?>
                                     </span>
                                 </td>
                             </tr>
@@ -263,6 +269,11 @@
         padding: 1rem;
         vertical-align: middle;
         color: #495057;
+    }
+
+    .ville-link {
+        color: #0d6efd;
+        text-decoration: underline;
     }
 
     .table-hover tbody tr:hover {

@@ -61,6 +61,12 @@ $router->get('/besoins/ville/@id_ville', function($id_ville) {
     $controller->besoinsParVille($id_ville);
 });
 
+// Détails d'une ville (liste des besoins + dons)
+$router->get('/besoins/ville/@id_ville/details', function($id_ville) {
+    $controller = new app\controllers\BesoinController();
+    $controller->detailsVille($id_ville);
+});
+
 // ===== ROUTES DONS =====
 $router->get('/dons/saisie', function() {
     $controller = new app\controllers\DonController();
