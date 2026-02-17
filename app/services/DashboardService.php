@@ -110,11 +110,23 @@ class DashboardService {
                 }
             }
 
-            // calculer la quantité totale des dons reçus pour la ville à partir de la table `dons`
-            $donsForVille = $this->model->getDonsByVille($vid);
-            foreach ($donsForVille as $donVille) {
-                $quantite_dons_recus += (int)($donVille['quantite'] ?? 0);
-                if (!empty($donVille['id'])) $dons_distinct[$donVille['id']] = true;
+            // calculer la quantité totale des dons reçus pour la ville en croisant les dons
+            // et les besoins déclarés pour cette ville (plus robuste que la requête SQL précédente)
+            // construire la liste des id_besoin demandés pour cette ville
+            $besoinsIdsPourVille = [];
+            foreach ($besoins as $b) {
+                if ((int)$b['id_ville'] === (int)$vid) {
+                    $besoinsIdsPourVille[] = (int)$b['id_besoin'];
+                }
+            }
+
+            if (!empty($besoinsIdsPourVille)) {
+                foreach ($dons as $don) {
+                    if (in_array((int)$don['id_besoin'], $besoinsIdsPourVille, true)) {
+                        $quantite_dons_recus += (int)($don['quantite'] ?? 0);
+                        if (!empty($don['id'])) $dons_distinct[$don['id']] = true;
+                    }
+                }
             }
 
             $result[] = [

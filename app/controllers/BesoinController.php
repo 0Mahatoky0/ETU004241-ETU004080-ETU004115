@@ -61,8 +61,9 @@ class BesoinController {
     }
     
     public function listeBesoins() {
-        $besoins = $this->model->getAllBesoinsSinistre();
-        
+        // Afficher la liste générale des besoins (catalogue), pas les besoins sinistre par ville
+        $besoins = $this->model->getAllBesoins();
+
         Flight::render('besoins/liste', [
             'besoins' => $besoins
         ]);
@@ -97,7 +98,8 @@ class BesoinController {
         }
 
         $besoins = $this->model->getBesoinsSinistreByVille($id_ville);
-        $dons = $this->model->getDonsByVille($id_ville);
+        // Retourner la liste complète des dons (ne pas filtrer par ville)
+        $dons = $this->model->getAllDons();
 
         Flight::render('besoins/details', [
             'ville' => $ville_info,
@@ -120,14 +122,17 @@ class BesoinController {
         Flight::json($villes);
     }
     
-    public function getBesoinsByCategorie() {
-        $id_categorie = Flight::request()->query['id_categorie'];
-        
+    public function getBesoinsByCategorie($id_categorie = null) {
+        // Accept id from route parameter or query string
+        if ($id_categorie === null) {
+            $id_categorie = Flight::request()->query['id_categorie'] ?? null;
+        }
+
         if (empty($id_categorie)) {
             Flight::json(['error' => 'ID catégorie requis'], 400);
             return;
         }
-        
+
         $besoins = $this->model->getBesoinsByCategorie($id_categorie);
         Flight::json($besoins);
     }

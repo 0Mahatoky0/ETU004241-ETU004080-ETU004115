@@ -19,7 +19,8 @@ class DonController {
         $categories = $this->model->getAllCategoriesBesoin();
         
         Flight::render('dons/form', [
-            'besoins' => $categories
+            'categories' => $categories,
+            'besoins' => []
         ]);
     }
     
