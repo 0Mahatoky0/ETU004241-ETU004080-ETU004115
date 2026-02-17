@@ -140,6 +140,16 @@ $router->post('/achats/configuration', function() {
     $controller->configuration();
 });
 
+$router->get('/achats/recapitulatif', function() {
+    $controller = new app\controllers\AchatController();
+    $controller->recapitulatif();
+});
+
+$router->get('/achats/api/recapitulatif', function() {
+    $controller = new app\controllers\AchatController();
+    $controller->apiRecapitulatif();
+});
+
 // ===== API ROUTES =====
 $router->get('/api/villes/region/@id_region', function($id_region) {
     $controller = new app\controllers\BesoinController();

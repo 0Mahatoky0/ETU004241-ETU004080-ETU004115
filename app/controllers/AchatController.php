@@ -192,4 +192,38 @@ class AchatController {
             'config' => $config
         ]);
     }
+    
+    // ===== PAGE RÉCAPITULATIVE =====
+    
+    public function recapitulatif() {
+        $recapitulatif = $this->model->getRecapitulatifBesoins();
+        $recapitulatif_par_region = $this->model->getRecapitulatifParRegion();
+        
+        Flight::render('achats/recapitulatif', [
+            'recapitulatif' => $recapitulatif,
+            'recapitulatif_par_region' => $recapitulatif_par_region
+        ]);
+    }
+    
+    // ===== API POUR RÉCAPITULATIF AJAX =====
+    
+    public function apiRecapitulatif() {
+        try {
+            $recapitulatif = $this->model->getRecapitulatifBesoins();
+            $recapitulatif_par_region = $this->model->getRecapitulatifParRegion();
+            
+            Flight::json([
+                'success' => true,
+                'recapitulatif' => $recapitulatif,
+                'recapitulatif_par_region' => $recapitulatif_par_region,
+                'timestamp' => date('Y-m-d H:i:s')
+            ]);
+            
+        } catch (Exception $e) {
+            Flight::json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

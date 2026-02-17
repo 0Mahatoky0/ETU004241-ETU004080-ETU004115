@@ -6,7 +6,10 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2><i class="bi bi-cart-plus"></i> Achats des Besoins</h2>
                 <div>
-                    <a href="/achats/liste" class="btn btn-outline-primary">
+                    <a href="/achats/recapitulatif" class="btn btn-info me-2">
+                        <i class="bi bi-bar-chart-line"></i> Récapitulatif
+                    </a>
+                    <a href="/achats/liste" class="btn btn-outline-primary me-2">
                         <i class="bi bi-list-ul"></i> Voir les achats
                     </a>
                     <a href="/achats/configuration" class="btn btn-outline-secondary">

@@ -432,6 +432,103 @@ class BNGRCModel {
         ];
     }
     
+    // ===== RÉCAPITULATIF DES BESOINS =====
+    
+    public function getRecapitulatifBesoins() {
+        $stmt = $this->db->query("
+            SELECT 
+                -- Besoins totaux
+                SUM(bs.quantite * b.prix_unitaire) as montant_total_besoins,
+                COUNT(DISTINCT bs.id) as nombre_total_besoins,
+                SUM(bs.quantite) as quantite_totale_besoins,
+                
+                -- Besoins satisfaits (quantité allouée)
+                SUM(COALESCE(md.sortie, 0) * b.prix_unitaire) as montant_satisfait,
+                COUNT(DISTINCT CASE WHEN COALESCE(SUM(md.sortie), 0) > 0 THEN bs.id END) as nombre_besoins_satisfaits,
+                SUM(COALESCE(md.sortie, 0)) as quantite_satisfaite,
+                
+                -- Besoins restants
+                SUM((bs.quantite - COALESCE(md.sortie, 0)) * b.prix_unitaire) as montant_restant,
+                COUNT(DISTINCT CASE WHEN (bs.quantite - COALESCE(md.sortie, 0)) > 0 THEN bs.id END) as nombre_besoins_restants,
+                SUM(bs.quantite - COALESCE(md.sortie, 0)) as quantite_restante,
+                
+                -- Taux de satisfaction
+                ROUND(
+                    (SUM(COALESCE(md.sortie, 0) * b.prix_unitaire) / SUM(bs.quantite * b.prix_unitaire)) * 100, 
+                    2
+                ) as taux_satisfaction_montant,
+                
+                ROUND(
+                    (SUM(COALESCE(md.sortie, 0)) / SUM(bs.quantite)) * 100, 
+                    2
+                ) as taux_satisfaction_quantite
+                
+            FROM besoin_sinistre bs
+            JOIN besoin b ON bs.id_besoin = b.id
+            LEFT JOIN mvt_dons md ON bs.id = md.id_besoin_ville
+            WHERE bs.quantite > 0
+        ");
+        
+        $result = $stmt->fetch();
+        
+        // Calculer les pourcentages si nécessaire
+        if ($result['montant_total_besoins'] > 0) {
+            $result['pourcentage_montant_satisfait'] = round(($result['montant_satisfait'] / $result['montant_total_besoins']) * 100, 2);
+            $result['pourcentage_montant_restant'] = round(($result['montant_restant'] / $result['montant_total_besoins']) * 100, 2);
+        } else {
+            $result['pourcentage_montant_satisfait'] = 0;
+            $result['pourcentage_montant_restant'] = 0;
+        }
+        
+        if ($result['quantite_totale_besoins'] > 0) {
+            $result['pourcentage_quantite_satisfaite'] = round(($result['quantite_satisfaite'] / $result['quantite_totale_besoins']) * 100, 2);
+            $result['pourcentage_quantite_restante'] = round(($result['quantite_restante'] / $result['quantite_totale_besoins']) * 100, 2);
+        } else {
+            $result['pourcentage_quantite_satisfaite'] = 0;
+            $result['pourcentage_quantite_restante'] = 0;
+        }
+        
+        return $result;
+    }
+    
+    public function getRecapitulatifParRegion() {
+        $stmt = $this->db->query("
+            SELECT 
+                r.libelle as region_libelle,
+                r.id as region_id,
+                
+                -- Besoins totaux par région
+                SUM(bs.quantite * b.prix_unitaire) as montant_total_besoins,
+                COUNT(DISTINCT bs.id) as nombre_total_besoins,
+                SUM(bs.quantite) as quantite_totale_besoins,
+                
+                -- Besoins satisfaits par région
+                SUM(COALESCE(md.sortie, 0) * b.prix_unitaire) as montant_satisfait,
+                SUM(COALESCE(md.sortie, 0)) as quantite_satisfaite,
+                
+                -- Besoins restants par région
+                SUM((bs.quantite - COALESCE(md.sortie, 0)) * b.prix_unitaire) as montant_restant,
+                SUM(bs.quantite - COALESCE(md.sortie, 0)) as quantite_restante,
+                
+                -- Taux de satisfaction
+                ROUND(
+                    (SUM(COALESCE(md.sortie, 0) * b.prix_unitaire) / NULLIF(SUM(bs.quantite * b.prix_unitaire), 0)) * 100, 
+                    2
+                ) as taux_satisfaction_montant
+                
+            FROM region r
+            LEFT JOIN ville v ON r.id = v.id_region
+            LEFT JOIN besoin_sinistre bs ON v.id = bs.id_ville
+            LEFT JOIN besoin b ON bs.id_besoin = b.id
+            LEFT JOIN mvt_dons md ON bs.id = md.id_besoin_ville
+            WHERE bs.quantite > 0 OR bs.id IS NULL
+            GROUP BY r.id, r.libelle
+            ORDER BY r.libelle
+        ");
+        
+        return $stmt->fetchAll();
+    }
+    
     // ===== TABLEAU DE BORD =====
     
     public function getDashboardStats() {
