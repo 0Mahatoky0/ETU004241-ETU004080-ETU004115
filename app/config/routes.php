@@ -37,7 +37,8 @@ $router->get('/besoins/saisie', function() {
 //insertion des dons
 $router->group('/dons', function() use ($router,$app) {
 	$router->get('/add',[DonControleur::class,"showFormDom"]);
-	$router->post('/api/add',[DonControleur::class,"insertDon"]);
+        $router->post('/api/add',[DonControleur::class,"insertDon"]);
+        $router->post('/api/add-no-auto',[DonControleur::class,"insertDonNoAuto"]);
 });
 
 //insertion des besoin des sinistrer
