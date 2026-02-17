@@ -83,8 +83,12 @@ class DistributionController {
             $success = $this->model->reinitialiserDistribution();
             
             if ($success) {
-                // Supprimer la simulation de la session si elle existe
+                // Supprimer TOUTES les simulations de la session
                 unset($_SESSION['distribution']);
+                unset($_SESSION['distribution_proportionnelle']);
+                unset($_SESSION['distribution_prioritaire']);
+                unset($_SESSION['distribution_type']);
+                
                 Flight::redirect('/distribution?reinitialise=1');
             } else {
                 throw new Exception("Erreur lors de la réinitialisation");
